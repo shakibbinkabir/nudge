@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Tab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app-container">
+    <div id="clock-container"></div>
+    <div id="search-container">
+      <form id="search-form">
+        <input type="search" id="search-input" placeholder="Search Google" required>
+      </form>
+    </div>
+    <div id="todo-card">
+      <form id="todo-form">
+        <input type="text" id="todo-input" placeholder="New task..." autocomplete="off" required>
+        <input type="date" id="todo-deadline">
+        <select id="todo-priority">
+          <option value="3">Low</option>
+          <option value="2" selected>Medium</option>
+          <option value="1">High</option>
+        </select>
+        <button type="submit">Add</button>
+      </form>
+      <div class="todo-header">
+        <h2>Today's Focus</h2>
+        <button id="toggle-view-btn">Show All</button>
+      </div>
+      <ul id="todo-list"></ul>
+    </div>
+  </main>
+  <a id="settings-link" title="Settings">⚙️</a>
+  <div id="attribution"></div>
+  <div id="attribution-container"></div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

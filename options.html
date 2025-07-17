@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nudge Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Nudge Settings</h1>
+        <p>Choose how you want to load background images.</p>
+
+        <div class="card">
+            <h2>Option 1: Get a Free API Key</h2>
+            
+            <!-- Connected email view - initially hidden -->
+            <div id="connected-email-view" class="hidden">
+                <p class="success">✓ Connected with <span id="connected-email-display">email@example.com</span></p>
+                <div class="button-group">
+                    <button id="remove-email-btn" class="secondary-btn">Remove Connection</button>
+                    <button id="change-email-btn" class="secondary-btn">Change Email</button>
+                </div>
+            </div>
+            
+            <!-- Registration form - shown by default unless connected -->
+            <div id="registration-view">
+                <p>Get a free, rate-limited API key from us. We'll send a code to your email to verify.</p>
+                <form id="register-form">
+                    <input type="email" id="email-input" placeholder="your-email@example.com" required>
+                    <button type="submit">Get Verification Code</button>
+                </form>
+                <form id="verify-form" class="hidden">
+                    <input type="text" id="otp-input" placeholder="Enter 6-digit code" required>
+                    <button type="submit">Verify & Save Key</button>
+                </form>
+                <div id="status-message-1"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Option 2: Use Your Own Pexels Key</h2>
+            
+            <!-- Connected Pexels view - initially hidden -->
+            <div id="connected-pexels-view" class="hidden">
+                <p class="success">✓ Using your own Pexels API key</p>
+                <div class="button-group">
+                    <button id="remove-pexels-btn" class="secondary-btn">Remove Key</button>
+                    <button id="change-pexels-btn" class="secondary-btn">Update Key</button>
+                </div>
+            </div>
+            
+            <!-- Pexels key form - shown by default unless connected -->
+            <div id="pexels-form-view">
+                <p>For unlimited backgrounds and maximum privacy, get a free key from Pexels.com and paste it here.</p>
+                <p id="switch-notice" class="hidden">
+                    <small><i>Note: Switching to this option will disable your Nudge API key connection.</i></small>
+                </p>
+                <form id="byok-form">
+                    <input type="text" id="pexels-key-input" placeholder="Paste your Pexels API Key" required>
+                    <button type="submit">Save Pexels Key</button>
+                </form>
+            </div>
+            <div id="status-message-2"></div>
+        </div>
+
+        <div class="card">
+            <h2>Distraction Management</h2>
+            <p>Add distracting websites here (one per line), for example: <em>youtube.com</em>, <em>reddit.com</em>, <em>twitter.com</em></p>
+            <form id="blacklist-form">
+                <textarea id="blacklist-textarea" rows="5"></textarea>
+                <button type="submit">Save Distraction List</button>
+            </form>
+            <div id="status-message-3"></div>
+        </div>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>

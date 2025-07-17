@@ -1,0 +1,262 @@
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+body {
+  background-image: url('background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Main container */
+#app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  gap: 2rem;
+}
+
+/* Clock container */
+#clock-container {
+  font-size: 3rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+  min-height: 70px;
+}
+
+/* Search container */
+#search-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+#search-form {
+  width: 100%;
+}
+
+#search-input {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  color: white;
+  font-size: 1.2rem;
+  outline: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+#search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#search-input:focus {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Todo card */
+#todo-card {
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(5px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+#todo-card h2 {
+  margin-top: 0;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+#todo-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+#todo-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.5rem 0.2rem;
+  flex-grow: 1; /* Make the text input take up most of the space */
+  margin-bottom: 0; /* Remove margin from previous stage */
+}
+
+#todo-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#todo-input:focus {
+  outline: none;
+  border-bottom-color: #fff;
+}
+
+#todo-deadline, #todo-priority, #todo-form button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+#todo-form button {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#todo-form button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+#toggle-view-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+}
+
+#todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#todo-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#todo-list li .task-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  cursor: pointer;
+  flex-grow: 1;
+}
+
+#todo-list li .task-deadline {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-top: 0.2rem;
+}
+
+#todo-list li.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0 0.5rem;
+  visibility: hidden; /* Hidden by default */
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+#todo-list li:hover .delete-btn {
+  visibility: visible; /* Show on hover */
+  opacity: 1;
+}
+
+.delete-btn:hover {
+  color: #fff;
+}
+
+/* Attribution */
+#attribution {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.75rem;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+#attribution:hover {
+  opacity: 1;
+}
+
+/* Attribution Container for Dynamic Background */
+#attribution-container {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    font-size: 0.8rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+#attribution-container a {
+    color: #fff;
+    text-decoration: none;
+    transition: text-decoration 0.2s;
+}
+
+#attribution-container a:hover {
+    text-decoration: underline;
+}
+
+/* Settings Link */
+#settings-link {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+#settings-link:hover {
+    opacity: 1;
+}

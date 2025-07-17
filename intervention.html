@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A Nudge...</title>
+    <link rel="stylesheet" href="intervention.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="quirky-message"></h1>
+        <p>You have more important things to do:</p>
+        <ul id="top-tasks-list"></ul>
+        
+        <div class="snooze-section">
+            <h3>Nah, I'll do it later...</h3>
+            <p>Snooze warning for:</p>
+            <div class="snooze-buttons">
+                <button class="snooze-btn" data-minutes="10">10 minutes 🙁</button>
+                <button class="snooze-btn" data-minutes="30">30 minutes 😨</button>
+                <button class="snooze-btn" data-minutes="60">1 hour 😭</button>
+            </div>
+            <p id="snooze-guilt" class="hidden"></p>
+        </div>
+    </div>
+    <script src="intervention.js"></script>
+</body>
+</html>
