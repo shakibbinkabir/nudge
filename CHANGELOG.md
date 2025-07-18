@@ -26,6 +26,7 @@ All notable changes to the Nudge Chrome Extension will be documented in this fil
 - Improved search suggestion implementation using message passing
 - Enhanced image search with file upload capability
 - Fixed clock display to always show leading zeros for hours (00:14 instead of 0:14)
+- Fixed selected options display remaining visible after adding a task
 
 ## [0.8.0] - 2025-07-18
 

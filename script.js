@@ -1058,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             {
-                regex: /by\s+next\s+week\b/i,
+                regex: /by\s+next\s+week\b  /i,
                 handler: () => {
                     const nextWeek = new Date();
                     nextWeek.setDate(nextWeek.getDate() + 7);
@@ -1207,6 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset the displayed options
             selectedDateElement.classList.remove('visible');
             selectedPriorityElement.classList.remove('visible');
+            selectedOptionsElement.style.display = 'none';
             taskOptions.classList.remove('visible');
         }
     });
@@ -1225,6 +1226,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Reset the displayed options
                 selectedDateElement.classList.remove('visible');
                 selectedPriorityElement.classList.remove('visible');
+                selectedOptionsElement.style.display = 'none';
                 taskOptions.classList.remove('visible');
             }
         }
