@@ -1,4 +1,6 @@
 /* Reset and base styles */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 * {
   box-sizing: border-box;
 }
@@ -7,7 +9,7 @@ html, body {
   height: 100vh;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Poppins', sans-serif;
   color: white;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -18,6 +20,20 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Black overlay with 25% opacity */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.25);
+  z-index: 0;
+  pointer-events: none;
 }
 
 /* Main container */
@@ -36,25 +52,51 @@ body {
 
 /* Clock container */
 #clock-container {
-  font-size: 3rem;
+  font-size: 4.5rem;
   font-weight: 300;
-  margin-bottom: 1rem;
-  min-height: 70px;
+  margin-bottom: 0.2rem;
+  min-height: 60px;
+  letter-spacing: -2px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Date container */
+#date-container {
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
 }
 
 /* Search container */
 #search-container {
   width: 100%;
   max-width: 600px;
+  position: relative;
+  z-index: 5;
 }
 
 #search-form {
   width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
 }
 
 #search-input {
   width: 100%;
   padding: 12px 20px;
+  padding-right: 90px; /* Space for the mic and camera icons */
   background-color: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 25px;
@@ -75,6 +117,87 @@ body {
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
+#search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 0 0 15px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  display: none;
+}
+
+#search-suggestions.active {
+  display: block;
+}
+
+.suggestion-item {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.suggestion-item:last-child {
+  border-radius: 0 0 15px 15px;
+}
+
+.search-icons {
+  position: absolute;
+  right: 15px;
+  display: flex;
+  gap: 15px;
+}
+
+.search-icon {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-icon:hover {
+  opacity: 1;
+}
+
+.search-icon.listening {
+  animation: pulse 1.5s infinite;
+  opacity: 1;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.search-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+.search-icon svg path {
+  fill: white; /* Override the var(--bbQxAb) to ensure visibility */
+}
+
 /* Todo card */
 #todo-card {
   background-color: rgba(0, 0, 0, 0.25);
@@ -86,6 +209,10 @@ body {
   margin-top: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 #todo-card h2 {
@@ -96,72 +223,107 @@ body {
   margin-bottom: 1rem;
 }
 
-#todo-form {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  align-items: center;
-}
-
-#todo-input {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  color: #fff;
-  font-size: 1rem;
-  padding: 0.5rem 0.2rem;
-  flex-grow: 1; /* Make the text input take up most of the space */
-  margin-bottom: 0; /* Remove margin from previous stage */
-}
-
-#todo-input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-#todo-input:focus {
-  outline: none;
-  border-bottom-color: #fff;
-}
-
-#todo-deadline, #todo-priority, #todo-form button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: #fff;
-  padding: 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-#todo-form button {
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-#todo-form button:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
 .todo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+  order: -1; /* Move to the top */
 }
 
 #toggle-view-btn {
-  background: none;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
   cursor: pointer;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 16px;
   font-size: 0.7rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(3px);
+  box-shadow: none;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#toggle-view-btn::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.7);
+  margin-right: 5px;
+  transition: all 0.2s ease;
+}
+
+#toggle-view-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 #todo-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  margin-bottom: 1.5rem;
+  order: 0; /* Move below header */
+  max-height: none; /* Default: no maximum height */
+  overflow-y: visible;
+  transition: opacity 0.2s ease;
+}
+
+/* Fixed height class for scroll behavior when showing all tasks */
+#todo-list.fixed-height-scroll {
+  max-height: 270px; /* Height for approximately 5 items */
+  overflow-y: auto;
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-right: 10px; /* Space for invisible scrollbar */
+  scroll-behavior: smooth; /* Smooth scrolling */
+  -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+}
+
+/* Hide the default scrollbar for WebKit browsers */
+#todo-list.fixed-height-scroll::-webkit-scrollbar {
+  width: 3px; /* Ultra-thin scrollbar */
+  background: transparent;
+}
+
+/* Custom track for the scrollbar - completely invisible */
+#todo-list.fixed-height-scroll::-webkit-scrollbar-track {
+  background: transparent; 
+  border: none;
+  margin: 10px 0; /* Larger margin for better touch target */
+}
+
+/* Custom thumb for the scrollbar - invisible by default */
+#todo-list.fixed-height-scroll::-webkit-scrollbar-thumb {
+  background: transparent; /* Fully invisible by default */
+  border-radius: 20px;
+  transition: background 0.25s ease;
+}
+
+/* Hide the scrollbar buttons */
+#todo-list.fixed-height-scroll::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+/* Only show scrollbar on hover for a subtle effect */
+#todo-list.fixed-height-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12); /* Very subtle on hover */
+}
+
+/* Active scrollbar when scrolling */
+#todo-list.fixed-height-scroll:active::-webkit-scrollbar-thumb,
+#todo-list.fixed-height-scroll:focus::-webkit-scrollbar-thumb,
+#todo-list.fixed-height-scroll:hover:active::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18); /* Slightly more visible when active */
 }
 
 #todo-list li {
@@ -213,6 +375,188 @@ body {
   color: #fff;
 }
 
+/* New add task form styles */
+#todo-form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto; /* Push to bottom */
+  margin-bottom: 0;
+  position: relative;
+  order: 1; /* Move to bottom */
+  /* border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem; */
+}
+
+.add-task-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.input-container {
+  flex-grow: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+#todo-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.5rem 0.2rem;
+  width: 100%;
+  outline: none;
+  transition: opacity 0.2s ease;
+}
+
+#todo-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.selected-options {
+  display: flex;
+  gap: 8px;
+  font-size: 0.8rem;
+  margin-top: 3px;
+  height: 18px;
+}
+
+.selected-option {
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.selected-option.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.task-options {
+  display: flex;
+  gap: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.task-options.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.task-option-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.1rem;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.task-option-btn:hover {
+  opacity: 1;
+}
+
+.task-date-picker {
+  position: absolute;
+  bottom: 35%;
+  right: -10%;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  display: none;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  width: 250px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.date-option {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  margin-bottom: 0.25rem;
+}
+
+.date-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.date-option-icon {
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+.date-option-label {
+  flex-grow: 1;
+}
+
+.date-option-value {
+  opacity: 0.7;
+  font-size: 0.8rem;
+}
+
+.importance-picker {
+  position: absolute;
+  bottom: 35%;
+  right: -10%;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  display: none;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  width: 200px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.importance-option {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  margin-bottom: 0.25rem;
+}
+
+.importance-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.importance-option-icon {
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+/* Hidden form elements */
+#todo-deadline, #todo-priority {
+  display: none;
+}
+
 /* Attribution */
 #attribution {
   position: fixed;
@@ -246,17 +590,109 @@ body {
     text-decoration: underline;
 }
 
+/* Chrome-style navigation */
+.chrome-nav {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.chrome-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chrome-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
 /* Settings Link */
 #settings-link {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
     cursor: pointer;
     text-decoration: none;
-    opacity: 0.7;
+    opacity: 0.8;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
 }
+
+#settings-link svg {
+    width: 24px;
+    height: 24px;
+}
+
 #settings-link:hover {
     opacity: 1;
+}
+
+.chrome-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.chrome-nav a:hover {
+  opacity: 1;
+}
+
+.chrome-nav-icon {
+  font-size: 1.3rem;
+  opacity: 0.8;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.chrome-nav-icon:hover {
+  opacity: 1;
+}
+
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: -2px; /* Slight adjustment to align vertically with text links */
+  overflow: hidden;
+  position: relative;
+}
+
+#profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#profile-initial {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Material Icons size */
+.material-icons {
+  font-size: 20px !important;
 }

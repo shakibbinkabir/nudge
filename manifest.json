@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Nudge",
-  "version": "0.7.1",
+  "version": "0.9.0",
   "description": "A beautiful and smart new tab page to help you focus on your tasks.",
   "icons": {
     "16": "icons/nudge-16x16.png",
@@ -17,9 +17,11 @@
   "background": {
     "service_worker": "background.js"
   },
-  "host_permissions": ["https://lab.shakibbinkabir.me/", "https://api.pexels.com/"],
+  "host_permissions": ["https://lab.shakibbinkabir.me/", "https://api.pexels.com/", "https://suggestqueries.google.com/"],
   "permissions": [
     "storage",
-    "tabs"
+    "tabs",
+    "activeTab",
+    "contextMenus"
   ]
 }

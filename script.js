@@ -12,11 +12,210 @@ document.addEventListener('DOMContentLoaded', () => {
     const todoList = document.getElementById('todo-list');
     const toggleViewBtn = document.getElementById('toggle-view-btn');
     const attributionContainer = document.getElementById('attribution-container');
-
+    
+    // New task UI elements
+    const addTaskButton = document.querySelector('.add-task-btn');
+    const datePickerBtn = document.getElementById('date-picker-btn');
+    const importanceBtn = document.getElementById('importance-btn');
+    const datePickerDropdown = document.getElementById('date-picker-dropdown');
+    const importanceDropdown = document.getElementById('importance-dropdown');
+    const dateOptions = document.querySelectorAll('.date-option');
+    const importanceOptions = document.querySelectorAll('.importance-option');
+    const selectedDateElement = document.getElementById('selected-date');
+    const selectedPriorityElement = document.getElementById('selected-priority');
+    const selectedOptionsElement = document.querySelector('.selected-options');
+    
+    // Initialize date values
+    updateDateValues();
+    
     // --- Add event listener for the settings link ---
     document.getElementById('settings-link').addEventListener('click', () => {
         chrome.runtime.openOptionsPage();
     });
+    
+    // --- Add task input focus handler with smooth transition ---
+    const taskOptions = document.querySelector('.task-options');
+    
+    todoInput.addEventListener('focus', () => {
+        // Fade out current placeholder
+        todoInput.style.opacity = '0';
+        
+        // After a short delay, change the placeholder and fade it back in
+        setTimeout(() => {
+            todoInput.setAttribute('placeholder', 'Try typing Reply to Australian Client\'s Email by Friday 6pm');
+            todoInput.style.opacity = '1';
+        }, 200);
+    });
+    
+    todoInput.addEventListener('blur', () => {
+        if (!todoInput.value) {
+            // Fade out current placeholder
+            todoInput.style.opacity = '0';
+            
+            // After a short delay, change the placeholder and fade it back in
+            setTimeout(() => {
+                todoInput.setAttribute('placeholder', 'Add a task');
+                todoInput.style.opacity = '1';
+            }, 200);
+            
+            // Hide task options when input is empty and loses focus
+            taskOptions.classList.remove('visible');
+        }
+    });
+    
+    // Show task options when user starts typing
+    todoInput.addEventListener('input', () => {
+        if (todoInput.value.length > 0) {
+            taskOptions.classList.add('visible');
+        } else {
+            taskOptions.classList.remove('visible');
+        }
+    });
+    
+    // --- Date picker functionality ---
+    datePickerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        importanceDropdown.style.display = 'none'; // Hide importance dropdown
+        datePickerDropdown.style.display = datePickerDropdown.style.display === 'block' ? 'none' : 'block';
+    });
+    
+    // Function to format date in a user-friendly way
+    const formatDateForDisplay = (date) => {
+        const options = { day: 'numeric', month: 'short' };
+        return date.toLocaleDateString('en-US', options);
+    };
+    
+    // Function to update selected date display
+    const updateSelectedDateDisplay = (date) => {
+        if (date) {
+            selectedDateElement.textContent = `📅 ${formatDateForDisplay(date)}`;
+            selectedDateElement.classList.add('visible');
+            selectedOptionsElement.style.display = 'block';
+        } else {
+            selectedDateElement.textContent = '';
+            selectedDateElement.classList.remove('visible');
+            selectedOptionsElement.style.display = 'none';
+        }
+    };
+    
+    // Function to update selected priority display
+    const updateSelectedPriorityDisplay = (priority) => {
+        let priorityText = '';
+        let priorityIcon = '⭐';
+        
+        switch(priority) {
+            case '1':
+                priorityText = 'High';
+                break;
+            case '2':
+                priorityText = 'Medium';
+                break;
+            case '3':
+                priorityText = 'Low';
+                break;
+            default:
+                priorityText = '';
+        }
+        
+        if (priorityText) {
+            selectedPriorityElement.textContent = `${priorityIcon} ${priorityText}`;
+            selectedPriorityElement.classList.add('visible');
+            selectedOptionsElement.style.display = 'block';
+        } else {
+            selectedPriorityElement.textContent = '';
+            selectedPriorityElement.classList.remove('visible');
+            selectedOptionsElement.style.display = 'none';
+        }
+    };
+    
+    dateOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const value = option.dataset.value;
+            
+            if (value === 'today') {
+                const today = new Date();
+                todoDeadline.valueAsDate = today;
+                updateSelectedDateDisplay(today);
+            } else if (value === 'tomorrow') {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                todoDeadline.valueAsDate = tomorrow;
+                updateSelectedDateDisplay(tomorrow);
+            } else if (value === 'next-week') {
+                const nextSunday = new Date();
+                nextSunday.setDate(nextSunday.getDate() + (7 - nextSunday.getDay()));
+                todoDeadline.valueAsDate = nextSunday;
+                updateSelectedDateDisplay(nextSunday);
+            } else if (value === 'pick-date') {
+                // Show native date picker
+                todoDeadline.showPicker();
+            }
+            
+            datePickerDropdown.style.display = 'none';
+        });
+    });
+    
+    // --- Importance picker functionality ---
+    importanceBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        datePickerDropdown.style.display = 'none'; // Hide date picker dropdown
+        importanceDropdown.style.display = importanceDropdown.style.display === 'block' ? 'none' : 'block';
+    });
+    
+    importanceOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const priorityValue = option.dataset.value;
+            todoPriority.value = priorityValue;
+            updateSelectedPriorityDisplay(priorityValue);
+            importanceDropdown.style.display = 'none';
+        });
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!datePickerBtn.contains(e.target) && !datePickerDropdown.contains(e.target)) {
+            datePickerDropdown.style.display = 'none';
+        }
+        
+        if (!importanceBtn.contains(e.target) && !importanceDropdown.contains(e.target)) {
+            importanceDropdown.style.display = 'none';
+        }
+    });
+    
+    // Enable shift+enter for description (placeholder for future implementation)
+    todoInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.shiftKey) {
+            e.preventDefault();
+            // Future implementation: Toggle description field
+            console.log('Description field requested');
+        }
+    });
+    
+    // Listen for date picker changes (native date picker)
+    todoDeadline.addEventListener('change', () => {
+        if (todoDeadline.value) {
+            const selectedDate = new Date(todoDeadline.value);
+            updateSelectedDateDisplay(selectedDate);
+        } else {
+            selectedDateElement.classList.remove('visible');
+        }
+    });
+    
+    // Function to update date values displayed in the dropdown
+    function updateDateValues() {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        const today = new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const nextSunday = new Date();
+        nextSunday.setDate(nextSunday.getDate() + (7 - nextSunday.getDay()));
+        
+        document.getElementById('today-value').textContent = days[today.getDay()];
+        document.getElementById('tomorrow-value').textContent = days[tomorrow.getDay()];
+        document.getElementById('next-week-value').textContent = days[nextSunday.getDay()];
+    }
 
     // =================================================================
     //  BACKGROUND IMAGE FUNCTIONALITY (REFACTORED for v2 WITH CACHING)
@@ -435,23 +634,272 @@ document.addEventListener('DOMContentLoaded', () => {
     //  CLOCK & SEARCH FUNCTIONALITY
     // =================================================================
     
-    // --- Clock ---
+    // --- Clock (Pixel phone style) ---
     function updateClock() {
         const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
+        
+        // Format hours with leading zero for single digits
+        let hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
+        
         clockContainer.textContent = `${hours}:${minutes}`;
+        
+        // Update the date in format: Friday, 18th July, 2025
+        updateDate(now);
     }
+    
+    // Function to get the ordinal suffix for a day (1st, 2nd, 3rd, etc.)
+    function getOrdinalSuffix(day) {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1: return 'st';
+            case 2: return 'nd';
+            case 3: return 'rd';
+            default: return 'th';
+        }
+    }
+    
+    // Function to update the date display
+    function updateDate(date) {
+        const dateContainer = document.getElementById('date-container');
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        const day = date.getDate();
+        const dayOfWeek = days[date.getDay()];
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        const ordinalSuffix = getOrdinalSuffix(day);
+        
+        dateContainer.textContent = `${dayOfWeek}, ${day}${ordinalSuffix} ${month}, ${year}`;
+    }
+    
     setInterval(updateClock, 1000);
     updateClock();
 
-    // --- Search ---
+    // --- Search with Autocomplete ---
+    const searchSuggestions = document.getElementById('search-suggestions');
+    const voiceSearchBtn = document.getElementById('voice-search-btn');
+    const imageSearchBtn = document.getElementById('image-search-btn');
+    
+    let currentSuggestions = [];
+    let selectedSuggestionIndex = -1;
+    let debounceTimeout = null;
+    
+    // Function to fetch search suggestions from Google
+    const fetchSuggestions = async (query) => {
+        if (!query.trim()) {
+            searchSuggestions.innerHTML = '';
+            searchSuggestions.classList.remove('active');
+            return;
+        }
+        
+        try {
+            // Use message passing to request suggestions from the background script
+            chrome.runtime.sendMessage(
+                { action: 'fetchSearchSuggestions', query: query },
+                (response) => {
+                    if (chrome.runtime.lastError) {
+                        console.error('Error sending message:', chrome.runtime.lastError);
+                        return;
+                    }
+                    
+                    if (response && response.success) {
+                        renderSuggestions(response.suggestions);
+                    } else if (response && response.suggestions) {
+                        renderSuggestions(response.suggestions);
+                    } else {
+                        searchSuggestions.innerHTML = '';
+                        searchSuggestions.classList.remove('active');
+                        console.error('Error fetching suggestions:', response?.error || 'Unknown error');
+                    }
+                }
+            );
+        } catch (error) {
+            console.error('Error fetching suggestions:', error);
+        }
+    };
+    
+    // Function to render suggestions
+    const renderSuggestions = (suggestions) => {
+        currentSuggestions = suggestions;
+        selectedSuggestionIndex = -1;
+        
+        if (suggestions.length === 0) {
+            searchSuggestions.innerHTML = '';
+            searchSuggestions.classList.remove('active');
+            return;
+        }
+        
+        searchSuggestions.innerHTML = '';
+        suggestions.forEach((suggestion, index) => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.textContent = suggestion;
+            item.addEventListener('click', () => {
+                searchInput.value = suggestion;
+                searchSuggestions.classList.remove('active');
+                // Use the same approach as the form's submit handler to navigate to Google
+                window.location.href = `https://www.google.com/search?q=${encodeURIComponent(suggestion)}`;
+            });
+            searchSuggestions.appendChild(item);
+        });
+        
+        searchSuggestions.classList.add('active');
+    };
+    
+    // Handle input for autocomplete
+    searchInput.addEventListener('input', (event) => {
+        const query = event.target.value.trim();
+        
+        // Clear any existing timeout
+        if (debounceTimeout) {
+            clearTimeout(debounceTimeout);
+        }
+        
+        // Set a new timeout to debounce the API call
+        debounceTimeout = setTimeout(() => {
+            fetchSuggestions(query);
+        }, 300); // 300ms debounce
+    });
+    
+    // Handle keyboard navigation for suggestions
+    searchInput.addEventListener('keydown', (event) => {
+        if (!searchSuggestions.classList.contains('active')) {
+            return;
+        }
+        
+        const suggestions = document.querySelectorAll('.suggestion-item');
+        
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1);
+                break;
+            case 'ArrowUp':
+                event.preventDefault();
+                selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+                break;
+            case 'Escape':
+                searchSuggestions.classList.remove('active');
+                selectedSuggestionIndex = -1;
+                return;
+            case 'Enter':
+                if (selectedSuggestionIndex >= 0) {
+                    event.preventDefault();
+                    const selectedSuggestion = currentSuggestions[selectedSuggestionIndex];
+                    searchInput.value = selectedSuggestion;
+                    searchSuggestions.classList.remove('active');
+                    // Navigate to Google search with the selected suggestion
+                    window.location.href = `https://www.google.com/search?q=${encodeURIComponent(selectedSuggestion)}`;
+                }
+                return;
+            default:
+                return;
+        }
+        
+        // Update the selected item visual cue
+        suggestions.forEach((item, index) => {
+            if (index === selectedSuggestionIndex) {
+                item.classList.add('selected');
+                searchInput.value = currentSuggestions[index];
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    });
+    
+    // Handle click outside to close suggestions
+    document.addEventListener('click', (event) => {
+        if (!searchSuggestions.contains(event.target) && event.target !== searchInput) {
+            searchSuggestions.classList.remove('active');
+        }
+    });
+    
+    // Handle form submission
     searchForm.addEventListener('submit', (event) => {
         event.preventDefault();
         const query = searchInput.value.trim();
         if (query) {
             window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
         }
+    });
+    
+    // Voice search functionality
+    voiceSearchBtn.addEventListener('click', () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            
+            voiceSearchBtn.classList.add('listening');
+            
+            recognition.start();
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                searchInput.value = transcript;
+                voiceSearchBtn.classList.remove('listening');
+                
+                // Trigger search
+                if (transcript) {
+                    setTimeout(() => {
+                        searchForm.submit();
+                    }, 500);
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                voiceSearchBtn.classList.remove('listening');
+            };
+            
+            recognition.onend = () => {
+                voiceSearchBtn.classList.remove('listening');
+            };
+        } else {
+            alert('Speech recognition is not supported in your browser');
+        }
+    });
+    
+    // Image search functionality
+    imageSearchBtn.addEventListener('click', () => {
+        // Create a hidden file input element
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+        
+        // Trigger the file selection dialog
+        fileInput.click();
+        
+        // Handle file selection
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                // Navigate to Google image search
+                const googleImagesUrl = 'https://www.google.com/searchbyimage/upload';
+                
+                // Create form for upload
+                const formData = new FormData();
+                formData.append('encoded_image', file);
+                
+                // Open a new tab for the search
+                chrome.runtime.sendMessage({
+                    action: 'imageSearch',
+                    file: URL.createObjectURL(file)
+                }, (response) => {
+                    // Clean up
+                    document.body.removeChild(fileInput);
+                });
+            } else {
+                // Clean up if no file was selected
+                document.body.removeChild(fileInput);
+            }
+        });
     });
 
     // =================================================================
@@ -493,7 +941,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const sortedTasks = sortTasks([...tasks]);
         const tasksToDisplay = showAllTasks ? sortedTasks : sortedTasks.slice(0, 5);
         
-        toggleViewBtn.textContent = showAllTasks ? 'Show Top 5' : `Show All (${tasks.length})`;
+        toggleViewBtn.textContent = showAllTasks ? 'Top 5' : `All ${tasks.length}`;
+        
+        // Apply fixed height class when showing all tasks with smooth animation
+        if (showAllTasks) {
+            todoList.style.opacity = '0.6';
+            setTimeout(() => {
+                todoList.classList.add('fixed-height-scroll');
+                setTimeout(() => {
+                    todoList.style.opacity = '1';
+                }, 50);
+            }, 50);
+        } else {
+            todoList.style.opacity = '0.6';
+            setTimeout(() => {
+                todoList.classList.remove('fixed-height-scroll');
+                setTimeout(() => {
+                    todoList.style.opacity = '1';
+                }, 50);
+            }, 50);
+        }
 
         tasksToDisplay.forEach(task => {
             const li = document.createElement('li');
@@ -555,14 +1022,211 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks();
     };
 
+    // --- Intelligent Task Detection Algorithm ---
+    const analyzeTask = (taskText) => {
+        // Original values (defaults)
+        let deadline = todoDeadline.value;
+        let priority = todoPriority.value;
+        let cleanText = taskText;
+        
+        // Date detection patterns
+        const datePatterns = [
+            // by Friday, Monday, etc.
+            {
+                regex: /by\s+(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i,
+                handler: (match) => {
+                    const today = new Date();
+                    const dayOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                        .indexOf(match[1].toLowerCase());
+                    const targetDate = new Date();
+                    
+                    // Calculate days to add
+                    let daysToAdd = dayOfWeek - today.getDay();
+                    if (daysToAdd <= 0) daysToAdd += 7; // If it's the same day or past, go to next week
+                    
+                    targetDate.setDate(today.getDate() + daysToAdd);
+                    return targetDate.toISOString().split('T')[0];
+                }
+            },
+            // "by tomorrow", "by next week"
+            {
+                regex: /by\s+tomorrow\b/i,
+                handler: () => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return tomorrow.toISOString().split('T')[0];
+                }
+            },
+            {
+                regex: /by\s+next\s+week\b/i,
+                handler: () => {
+                    const nextWeek = new Date();
+                    nextWeek.setDate(nextWeek.getDate() + 7);
+                    return nextWeek.toISOString().split('T')[0];
+                }
+            },
+            // "by month day" e.g., "by July 30", "by Dec 25"
+            {
+                regex: /by\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?/i,
+                handler: (match) => {
+                    const months = {
+                        'jan': 0, 'january': 0, 'feb': 1, 'february': 1, 'mar': 2, 'march': 2,
+                        'apr': 3, 'april': 3, 'may': 4, 'jun': 5, 'june': 5, 'jul': 6, 'july': 6,
+                        'aug': 7, 'august': 7, 'sep': 8, 'september': 8, 'oct': 9, 'october': 9,
+                        'nov': 10, 'november': 10, 'dec': 11, 'december': 11
+                    };
+                    
+                    const month = months[match[1].toLowerCase()];
+                    const day = parseInt(match[2], 10);
+                    
+                    const targetDate = new Date();
+                    const currentMonth = targetDate.getMonth();
+                    
+                    // If the month is earlier than the current month, go to next year
+                    if (month < currentMonth) {
+                        targetDate.setFullYear(targetDate.getFullYear() + 1);
+                    }
+                    
+                    targetDate.setMonth(month);
+                    targetDate.setDate(day);
+                    
+                    return targetDate.toISOString().split('T')[0];
+                }
+            },
+            // time pattern (by X AM/PM, at X AM/PM)
+            {
+                regex: /by\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i,
+                handler: (match) => {
+                    // If time is included, it's likely due today
+                    const today = new Date();
+                    
+                    // Very early hours (before 9 AM) might be high priority
+                    const hour = parseInt(match[1], 10);
+                    const isPM = match[3].toLowerCase() === 'pm';
+                    
+                    if (hour < 9 && !isPM) {
+                        // Early morning deadlines get high priority
+                        priority = '1';
+                    }
+                    
+                    return today.toISOString().split('T')[0];
+                }
+            }
+        ];
+        
+        // Urgency words to determine priority
+        const urgencyWords = {
+            high: [
+                'urgent', 'asap', 'immediately', 'critical', 'important', 'crucial', 
+                'vital', 'essential', 'emergency', 'priority', 'deadline'
+            ],
+            medium: [
+                'soon', 'needed', 'necessary', 'required', 'should'
+            ],
+            low: [
+                'whenever', 'someday', 'eventually', 'might', 'could', 'possibly', 
+                'consider', 'think about'
+            ]
+        };
+        
+        // Check for date patterns
+        for (const pattern of datePatterns) {
+            const match = taskText.match(pattern.regex);
+            if (match) {
+                deadline = pattern.handler(match);
+                
+                // Remove the matched date text from the task
+                cleanText = cleanText.replace(pattern.regex, '').trim();
+                break; // Only use the first detected date pattern
+            }
+        }
+        
+        // Calculate urgency based on deadline proximity
+        if (deadline) {
+            const today = new Date();
+            const dueDate = new Date(deadline);
+            const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+            
+            // Adjust priority based on time remaining
+            if (daysUntilDue <= 1) {
+                priority = '1'; // High - Today or tomorrow
+            } else if (daysUntilDue <= 3) {
+                priority = '2'; // Medium - Within 3 days
+            } else {
+                priority = '3'; // Low - More than 3 days away
+            }
+        }
+        
+        // Check for urgency words
+        let wordCount = {high: 0, medium: 0, low: 0};
+        
+        const lowerText = taskText.toLowerCase();
+        for (const word of urgencyWords.high) {
+            if (lowerText.includes(word)) wordCount.high++;
+        }
+        for (const word of urgencyWords.medium) {
+            if (lowerText.includes(word)) wordCount.medium++;
+        }
+        for (const word of urgencyWords.low) {
+            if (lowerText.includes(word)) wordCount.low++;
+        }
+        
+        // Override priority based on urgency words if they exist
+        if (wordCount.high > 0) priority = '1';
+        else if (wordCount.medium > 0) priority = '2';
+        else if (wordCount.low > 0) priority = '3';
+        
+        // Update UI to show detected date and priority
+        if (deadline) {
+            todoDeadline.value = deadline;
+            updateSelectedDateDisplay(new Date(deadline));
+        }
+        
+        if (priority !== todoPriority.value) {
+            todoPriority.value = priority;
+            updateSelectedPriorityDisplay(priority);
+        }
+        
+        return {
+            text: cleanText,
+            deadline: deadline,
+            priority: priority
+        };
+    };
+    
     // --- Event Listeners ---
     todoForm.addEventListener('submit', (event) => {
         event.preventDefault();
         const taskText = todoInput.value.trim();
         if (taskText) {
-            addTask(taskText, todoDeadline.value, todoPriority.value);
+            const analyzed = analyzeTask(taskText);
+            addTask(analyzed.text, analyzed.deadline, analyzed.priority);
             todoForm.reset();
             todoPriority.value = "2"; // Reset priority to Medium
+            
+            // Reset the displayed options
+            selectedDateElement.classList.remove('visible');
+            selectedPriorityElement.classList.remove('visible');
+            taskOptions.classList.remove('visible');
+        }
+    });
+    
+    // Add task by pressing Enter
+    todoInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            const taskText = todoInput.value.trim();
+            if (taskText) {
+                const analyzed = analyzeTask(taskText);
+                addTask(analyzed.text, analyzed.deadline, analyzed.priority);
+                todoForm.reset();
+                todoPriority.value = "2"; // Reset priority to Medium
+                
+                // Reset the displayed options
+                selectedDateElement.classList.remove('visible');
+                selectedPriorityElement.classList.remove('visible');
+                taskOptions.classList.remove('visible');
+            }
         }
     });
 
@@ -570,11 +1234,102 @@ document.addEventListener('DOMContentLoaded', () => {
         showAllTasks = !showAllTasks;
         renderTasks();
     });
+    
+    // Voice and camera search buttons
+    document.querySelectorAll('.search-icon').forEach(button => {
+        button.addEventListener('click', () => {
+            if (button.title === 'Search by voice') {
+                // Implement Web Speech API for voice search
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    const recognition = new SpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.lang = 'en-US';
+                    
+                    const micButton = button;
+                    const originalInnerHTML = micButton.innerHTML;
+                    
+                    recognition.start();
+                    micButton.classList.add('listening');
+                    
+                    recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        searchInput.value = transcript;
+                        micButton.classList.remove('listening');
+                        micButton.innerHTML = originalInnerHTML;
+                        
+                        // Auto-submit the form after a short delay
+                        setTimeout(() => {
+                            searchForm.dispatchEvent(new Event('submit'));
+                        }, 300);
+                    };
+                    
+                    recognition.onerror = (event) => {
+                        console.error('Speech recognition error:', event.error);
+                        micButton.classList.remove('listening');
+                        micButton.innerHTML = originalInnerHTML;
+                    };
+                    
+                    recognition.onend = () => {
+                        micButton.classList.remove('listening');
+                        micButton.innerHTML = originalInnerHTML;
+                    };
+                } else {
+                    console.warn('Web Speech API not supported in this browser.');
+                    alert('Voice search is not supported in your browser.');
+                }
+            } else if (button.title === 'Search by image') {
+                // Create a file input element
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.style.display = 'none';
+                document.body.appendChild(fileInput);
+                
+                // Listen for file selection
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        
+                        reader.onload = (event) => {
+                            const imageDataUrl = event.target.result;
+                            // Get base64 string without metadata
+                            const base64String = imageDataUrl.split(',')[1];
+                            
+                            // Navigate to Google Lens with the image
+                            const googleSearchUrl = `https://www.google.com/searchbyimage?image_url=${encodeURIComponent(imageDataUrl)}`;
+                            window.open(googleSearchUrl, '_blank');
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                    document.body.removeChild(fileInput);
+                });
+                
+                // Trigger file selection
+                fileInput.click();
+            }
+        });
+    });
 
     // --- Initial Load ---
     chrome.storage.local.get(['tasks'], (result) => {
         tasks = result.tasks || [];
         renderTasks();
+    });
+    
+    // =================================================================
+    //  USER PROFILE FUNCTIONALITY (SIMPLIFIED - NO GOOGLE LOGIN)
+    // =================================================================
+    
+    const userProfile = document.getElementById('user-profile');
+    
+    // Simplified profile icon handling - just use the SVG icon
+    // Add click handler for the profile icon to open Chrome settings
+    userProfile.addEventListener('click', () => {
+        // Opens Chrome settings instead of Google account
+        chrome.tabs.create({ url: 'chrome://settings/' });
     });
 });
 
@@ -582,3 +1337,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function array_rand(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
+
+// Debug function to test if Web Speech API is available
+window.checkSpeechApiSupport = function() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    return {
+        isSupported: !!SpeechRecognition,
+        apiObject: SpeechRecognition ? 'Available' : 'Not available'
+    };
+};
