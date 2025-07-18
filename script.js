@@ -147,8 +147,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 todoDeadline.valueAsDate = nextSunday;
                 updateSelectedDateDisplay(nextSunday);
             } else if (value === 'pick-date') {
-                // Show native date picker
-                todoDeadline.showPicker();
+                // Show native date picker with proper positioning
+                todoDeadline.classList.add('show-picker');
+                
+                // Small delay to ensure positioning is applied before showing picker
+                setTimeout(() => {
+                    todoDeadline.showPicker();
+                }, 50);
+                
+                // Hide the native picker when focus is lost or date is selected
+                const hidePicker = () => {
+                    todoDeadline.classList.remove('show-picker');
+                    todoDeadline.removeEventListener('blur', hidePicker);
+                    todoDeadline.removeEventListener('change', hidePicker);
+                };
+                
+                todoDeadline.addEventListener('blur', hidePicker);
+                todoDeadline.addEventListener('change', hidePicker);
             }
             
             datePickerDropdown.style.display = 'none';
@@ -180,6 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!importanceBtn.contains(e.target) && !importanceDropdown.contains(e.target)) {
             importanceDropdown.style.display = 'none';
         }
+        
+        // Hide native date picker if clicking outside
+        if (!todoDeadline.contains(e.target) && !datePickerBtn.contains(e.target) && !datePickerDropdown.contains(e.target)) {
+            todoDeadline.classList.remove('show-picker');
+        }
     });
     
     // Enable shift+enter for description (placeholder for future implementation)
@@ -199,6 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             selectedDateElement.classList.remove('visible');
         }
+        
+        // Hide the native picker after selection
+        todoDeadline.classList.remove('show-picker');
     });
     
     // Function to update date values displayed in the dropdown

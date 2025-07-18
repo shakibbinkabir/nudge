@@ -553,8 +553,78 @@ body::before {
 }
 
 /* Hidden form elements */
-#todo-deadline, #todo-priority {
+#todo-priority {
   display: none;
+}
+
+/* Native date picker styling */
+#todo-deadline {
+  position: absolute;
+  bottom: 35%;
+  right: -10%;
+  opacity: 0;
+  pointer-events: none;
+  width: 250px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 15;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#todo-deadline::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+#todo-deadline::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#todo-deadline::-webkit-datetime-edit {
+  color: white;
+  font-family: 'Poppins', sans-serif;
+}
+
+#todo-deadline::-webkit-datetime-edit-fields-wrapper {
+  color: white;
+}
+
+#todo-deadline::-webkit-datetime-edit-text {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#todo-deadline::-webkit-datetime-edit-month-field,
+#todo-deadline::-webkit-datetime-edit-day-field,
+#todo-deadline::-webkit-datetime-edit-year-field {
+  color: white;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+#todo-deadline:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+/* Show the date picker when needed */
+#todo-deadline.show-picker {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Attribution */

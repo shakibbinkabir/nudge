@@ -18,6 +18,11 @@ All notable changes to the Nudge Chrome Extension will be documented in this fil
 - Modernized "Show All" and "Show Top 5" buttons with a more minimal design
 - Enhanced scrollbar styling for task list with completely invisible scrollbars that only appear on hover
 - Improved task list scrolling experience with smooth scroll behavior
+
+### Fixed
+- Fixed native calendar date picker positioning to appear in the same location as the custom date picker dropdown
+- Modernized and improved styling of the native date picker with glassmorphism effect and better typography
+- Enhanced date picker UX with proper show/hide animations and click-outside handling
 - Task management now intelligently sets due dates and priorities based on task content
 
 ### Fixed
