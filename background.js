@@ -116,12 +116,24 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                             chrome.storage.local.set({ snoozes: snoozes });
                         }
                         
-                        // Generate the intervention page URL with originalUrl parameter
-                        const interventionUrl = chrome.runtime.getURL("intervention.html") + "?originalUrl=" + encodeURIComponent(changeInfo.url);
-                        
-                        // Redirect the tab to our intervention page
-                        console.log(`Redirecting to intervention page: ${interventionUrl}`);
-                        chrome.tabs.update(tabId, { url: interventionUrl });
+                        // Check if all tasks are completed or no tasks exist before showing intervention
+                        chrome.storage.local.get(['tasks'], (taskResult) => {
+                            const tasks = taskResult.tasks || [];
+                            const allTasksCompleted = tasks.length > 0 && tasks.every(task => task.completed);
+                            const noTasks = tasks.length === 0;
+                            
+                            if (allTasksCompleted || noTasks) {
+                                console.log(`Skipping intervention: ${allTasksCompleted ? 'All tasks completed' : 'No tasks available'}`);
+                                return; // Allow navigation to continue
+                            }
+                            
+                            // Generate the intervention page URL with originalUrl parameter
+                            const interventionUrl = chrome.runtime.getURL("intervention.html") + "?originalUrl=" + encodeURIComponent(changeInfo.url);
+                            
+                            // Redirect the tab to our intervention page
+                            console.log(`Redirecting to intervention page: ${interventionUrl}`);
+                            chrome.tabs.update(tabId, { url: interventionUrl });
+                        });
                     }
                 } else {
                     console.log(`ALLOWED: ${changeInfo.url} (hostname: ${hostname})`);
