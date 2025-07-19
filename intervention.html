@@ -6,20 +6,25 @@
     <link rel="stylesheet" href="intervention.css">
 </head>
 <body>
+    <div class="background-overlay"></div>
     <div class="container">
         <h1 id="quirky-message"></h1>
-        <p>You have more important things to do:</p>
-        <ul id="top-tasks-list"></ul>
-        
-        <div class="snooze-section">
-            <h3>Nah, I'll do it later...</h3>
-            <p>Snooze warning for:</p>
-            <div class="snooze-buttons">
-                <button class="snooze-btn" data-minutes="10">10 minutes 🙁</button>
-                <button class="snooze-btn" data-minutes="30">30 minutes 😨</button>
-                <button class="snooze-btn" data-minutes="60">1 hour 😭</button>
+        <div id="task-content-wrapper">
+            <p>You have more important things to do:</p>
+            <div class="tasks-card">
+                <ul id="top-tasks-list"></ul>
             </div>
-            <p id="snooze-guilt" class="hidden"></p>
+            <button id="show-snooze-btn">I'll Do Later!</button>
+        </div>
+        <div class="snooze-section">
+            <h3>Fine, ignore me then... 🙄</h3>
+            <p>How long are you planning to procrastinate?</p>
+            <div class="snooze-buttons">
+                <button class="snooze-btn" data-minutes="10">Just 10 minutes 🙁</button>
+                <button class="snooze-btn" data-minutes="30">Half an hour 😨</button>
+                <button class="snooze-btn" data-minutes="60">A whole hour 😭</button>
+            </div>
+            <p id="snooze-guilt"></p>
         </div>
     </div>
     <script src="intervention.js"></script>

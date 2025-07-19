@@ -1,128 +1,188 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const containerEl = document.querySelector('.container');
     const messageEl = document.getElementById('quirky-message');
+    const taskContentWrapper = document.getElementById('task-content-wrapper');
     const tasksEl = document.getElementById('top-tasks-list');
+    const showSnoozeBtn = document.getElementById('show-snooze-btn');
+    const snoozeSection = document.querySelector('.snooze-section');
     const snoozeButtons = document.querySelectorAll('.snooze-btn');
     const guiltMessageEl = document.getElementById('snooze-guilt');
 
-    const quirkyMessages = [
-        "Don't you wanna do it? 😏",
-        "Are you forgetting me? 🥹",
-        "You are ignoring me! 😭",
-        "Focus! You got this.",
-        "Is this really what you want?"
-    ];
+    // =================================================================
+    //  1. DYNAMIC BACKGROUND LOGIC (FINAL IMPLEMENTATION)
+    // =================================================================
+    const PEXELS_QUERY = "Dark Nature";
+    const NUDGE_API_URL = 'https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/image.php';
+    const PEXELS_API_URL = `https://api.pexels.com/v1/search?query=${encodeURIComponent(PEXELS_QUERY)}&per_page=20`;
+    const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // Cache for 24 hours
 
-    // Show a random message
-    messageEl.textContent = quirkyMessages[Math.floor(Math.random() * quirkyMessages.length)];
-    
-    // Function to sort tasks (copied from newtab script for now)
-    const sortTasks = (taskArray) => {
-        return taskArray.sort((a, b) => {
-            if (a.completed !== b.completed) return a.completed ? 1 : -1;
-            if (a.priority !== b.priority) return a.priority - b.priority;
-            const dateA = a.deadline ? new Date(a.deadline) : null;
-            const dateB = b.deadline ? new Date(b.deadline) : null;
-            if (dateA && !dateB) return -1;
-            if (!dateA && dateB) return 1;
-            if (dateA && dateB) {
-                if (dateA.getTime() !== dateB.getTime()) return dateA.getTime() - dateB.getTime();
+    const setBackground = (imageUrl) => {
+        document.body.style.backgroundImage = `url(${imageUrl})`;
+    };
+
+    const fetchAndCacheBackground = async (keys) => {
+        try {
+            let imageUrlToCache;
+            if (keys.userPexelsKey) {
+                const response = await fetch(PEXELS_API_URL, { headers: { 'Authorization': keys.userPexelsKey } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Pexels API error');
+                if (data.photos && data.photos.length > 0) {
+                    const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
+                    imageUrlToCache = photo.src.large2x;
+                }
+            } else if (keys.nudgeApiKey) {
+                const response = await fetch(NUDGE_API_URL, { headers: { 'X-API-KEY': keys.nudgeApiKey } });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Nudge API error');
+                imageUrlToCache = data.image_url;
             }
-            return a.id - b.id;
+
+            if (imageUrlToCache) {
+                chrome.storage.local.set({ interventionBg: { url: imageUrlToCache, timestamp: Date.now() } });
+                setBackground(imageUrlToCache);
+            }
+        } catch (error) {
+            console.error("Failed to fetch new intervention background:", error);
+        }
+    };
+
+    const handleInterventionBackground = () => {
+        chrome.storage.local.get(['nudgeApiKey', 'userPexelsKey', 'interventionBg'], (result) => {
+            const now = Date.now();
+            const cache = result.interventionBg;
+
+            if (cache && (now - cache.timestamp < CACHE_DURATION_MS)) {
+                setBackground(cache.url);
+            } else {
+                fetchAndCacheBackground({ nudgeApiKey: result.nudgeApiKey, userPexelsKey: result.userPexelsKey });
+            }
         });
     };
 
-    // Load and display top 3 tasks
-    chrome.storage.local.get(['tasks'], (result) => {
-        if (result.tasks && result.tasks.length > 0) {
-            const sortedTasks = sortTasks(result.tasks);
-            const tasksToDisplay = sortedTasks.slice(0, 3);
-            tasksToDisplay.forEach(task => {
-                const li = document.createElement('li');
-                li.textContent = task.text;
-                tasksEl.appendChild(li);
-            });
-        } else {
-            tasksEl.innerHTML = '<li>You have no tasks!</li>';
-        }
+    // Initialize background handling
+    handleInterventionBackground();
+
+    // =================================================================
+    //  ANIMATION & CONTENT ORCHESTRATION
+    // =================================================================
+    const quirkyMessages = [
+        // Original Messages
+        "This Energy Could Be Used Elsewhere ✨",
+        "Focus! You got this. 💪",
+        "Are you forgetting me? 🥹",
+
+        // New Additions
+        "Did you just trip and fall into this tab? 😉",
+        "Your to-do list is getting lonely. 🥺",
+        "The Procrastination Station is closed. 🚂",
+        "Future you is begging you to stop. 🙏",
+        "I see you've chosen chaos. Let's reconsider. 🤔",
+        "This isn't the focus you're looking for. *waves hand*",
+        "Error 404: Focus Not Found. 🤷",
+        "Running `sudo focus --now`... 💻",
+        "Seriously? Again? 😂",
+        "Hello, it's me, your conscience. 😇",
+        "The dopamine is temporary, but the deadline is real. 💀",
+        "Let's not and say we did. But for real, let's not. 🤫",
+        "Are we working hard or hardly working? 👀",
+        "Those tasks aren't going to complete themselves! 🤖",
+        "A wild distraction appears! Quick, use FOCUS! 💥",
+        "Is this on your to-do list? I'll wait. 🧐",
+        "Don't make me use the puppy-dog eyes. 🥺",
+        "You're better than this tab. You know it, I know it. 👍",
+        "Okay, but what if we... didn't? 🤯",
+        "Your goals are on another tab, literally. 🗺️",
+        "Let's turn that brain power back to your tasks. 🧠",
+        "Another one? DJ Khaled would be proud, but I'm not. 😅",
+        "This is your daily reminder that you're awesome and have stuff to do. ✨",
+        "I'm not mad, just disappointed. 😕",
+        "Get back to work, you brilliant human! 🌟",
+        "Was this part of the master plan? 🤨"
+    ];
+    messageEl.textContent = quirkyMessages[Math.floor(Math.random() * quirkyMessages.length)];
+
+    setTimeout(() => {
+        containerEl.classList.add('visible');
+        setTimeout(() => {
+            messageEl.classList.add('visible');
+            taskContentWrapper.style.display = 'none';
+            setTimeout(() => {
+                taskContentWrapper.style.display = 'flex';
+                containerEl.classList.add('tasks-visible');
+            }, 3000);
+        }, 500);
+    }, 600);
+
+    // =================================================================
+    //  SNOOZE TRANSITION LOGIC
+    // =================================================================
+    showSnoozeBtn.addEventListener('click', () => {
+        messageEl.style.transition = 'none';
+        messageEl.style.display = 'none';
+        taskContentWrapper.style.opacity = '0';
+        taskContentWrapper.style.pointerEvents = 'none';
+        snoozeSection.classList.add('visible');
     });
-    
-    // --- 1. Get the original URL the user was trying to visit ---
+
+    // =================================================================
+    //  SNOOZE & TASK LOGIC
+    // =================================================================
     const urlParams = new URLSearchParams(window.location.search);
     const originalUrl = urlParams.get('originalUrl');
-    
-    if (!originalUrl) {
-        console.error('No original URL found in query parameters');
-        // Hide the snooze section if there's no URL to go back to
-        document.querySelector('.snooze-section').classList.add('hidden');
-    }
 
-    // --- 2. Set up event listeners for snooze buttons ---
     snoozeButtons.forEach(button => {
         button.addEventListener('click', () => {
-            if (!originalUrl) {
-                console.log('No original URL to snooze for');
-                return;
-            }
-            
+            if (!originalUrl) return;
             const minutes = parseInt(button.dataset.minutes, 10);
             const snoozeUntil = Date.now() + (minutes * 60 * 1000);
-            
-            try {
-                // Get the domain from the original URL to use as a key
-                const url = new URL(originalUrl);
-                const domain = url.hostname;
-                
-                if (!domain) {
-                    console.error('Invalid hostname in URL:', originalUrl);
-                    return;
-                }
-
-                // Save the snooze information
-                chrome.storage.local.get(['snoozes', 'snoozeHistory'], (result) => {
-                    const snoozes = result.snoozes || {};
-                    snoozes[domain] = snoozeUntil;
-                    
-                    // Track total snooze time for the day for the guilt message
-                    const today = new Date().toISOString().slice(0, 10);
-                    const snoozeHistory = result.snoozeHistory || {};
-                    snoozeHistory[today] = (snoozeHistory[today] || 0) + minutes;
-
-                    chrome.storage.local.set({ snoozes: snoozes, snoozeHistory: snoozeHistory }, () => {
-                        if (chrome.runtime.lastError) {
-                            console.error('Error saving snooze:', chrome.runtime.lastError);
-                            return;
-                        }
-                        
-                        console.log(`Snooze set for ${domain} until ${new Date(snoozeUntil).toLocaleTimeString()}`);
-                        
-                        // Redirect the user to their original destination
-                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                            if (tabs && tabs.length > 0) {
-                                chrome.tabs.update(tabs[0].id, { url: originalUrl });
-                            } else {
-                                console.error('No active tab found for redirection');
-                                // Fallback - try to open in a new tab
-                                window.location.href = originalUrl;
-                            }
-                        });
-                    });
+            const domain = new URL(originalUrl).hostname;
+            chrome.storage.local.get(['snoozes', 'snoozeHistory'], (result) => {
+                const snoozes = result.snoozes || {};
+                snoozes[domain] = snoozeUntil;
+                const today = new Date().toISOString().slice(0, 10);
+                const snoozeHistory = result.snoozeHistory || {};
+                snoozeHistory[today] = (snoozeHistory[today] || 0) + minutes;
+                chrome.storage.local.set({ snoozes, snoozeHistory }, () => {
+                    chrome.tabs.update({ url: originalUrl });
                 });
-            } catch (err) {
-                console.error('Error processing snooze:', err);
-                alert('There was an error processing your request. Please try again.');
-            }
+            });
         });
     });
 
-    // --- 3. Display the guilt message if applicable ---
     chrome.storage.local.get(['snoozeHistory'], (result) => {
         const today = new Date().toISOString().slice(0, 10);
-        const snoozeHistory = result.snoozeHistory || {};
-        const snoozedMinutesToday = snoozeHistory[today] || 0;
-
+        const snoozedMinutesToday = (result.snoozeHistory || {})[today] || 0;
         if (snoozedMinutesToday > 0) {
-            guiltMessageEl.textContent = `You already ignoring me for last ${snoozedMinutesToday} minutes 💔`;
-            guiltMessageEl.classList.remove('hidden');
+            guiltMessageEl.textContent = `You are already ignoring me for last ${snoozedMinutesToday} minutes today... 💔`;
+        }
+    });
+
+    const getDayWithSuffix = (d) => (d > 3 && d < 21) ? `${d}th` : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][d % 10];
+    const sortTasks = (arr) => arr.sort((a, b) => (a.completed - b.completed) || (a.priority - b.priority) || ((a.deadline ? new Date(a.deadline) : Infinity) - (b.deadline ? new Date(b.deadline) : Infinity)) || (a.id - b.id));
+
+    chrome.storage.local.get(['tasks'], (result) => {
+        if (result.tasks && result.tasks.length > 0) {
+            const tasksToDisplay = sortTasks(result.tasks).filter(t => !t.completed).slice(0, 3);
+            if (tasksToDisplay.length === 0) {
+                tasksEl.innerHTML = '<li>You have no incomplete tasks!</li>';
+                return;
+            }
+            tasksToDisplay.forEach(task => {
+                const li = document.createElement('li');
+                const taskText = `<span>${task.text}</span>`;
+                let metaParts = [];
+                if (task.deadline) {
+                    const date = new Date(task.deadline + 'T00:00:00');
+                    metaParts.push(`Due on: ${getDayWithSuffix(date.getDate())} ${date.toLocaleDateString('en-US', { month: 'long' })}`);
+                }
+                metaParts.push(`Priority: ${{1: 'High', 2: 'Medium', 3: 'Low'}[task.priority]}`);
+                const taskMeta = `<span class="task-meta">${metaParts.join(' | ')}</span>`;
+                li.innerHTML = `${taskText}${taskMeta}`;
+                tasksEl.appendChild(li);
+            });
+        } else {
+            tasksEl.innerHTML = '<li>You have no tasks! Go enjoy your day.</li>';
         }
     });
 });

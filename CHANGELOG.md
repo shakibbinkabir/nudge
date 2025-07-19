@@ -2,6 +2,61 @@
 
 All notable changes to the Nudge Chrome Extension will be documented in this file.
 
+## [0.9.4] - 2025-07-20
+
+### Enhanced
+- Expanded quirky message collection from 3 to 28 options
+- Added emoji enrichment to all messages for improved user engagement
+- Improved variety of tone and style in intervention messages
+
+## [0.9.3] - 2025-07-20
+
+### Added
+- Implemented dynamic background image system for the intervention page
+- Added "Dark Nature" themed image fetching via Pexels API or Nudge API
+- Created background image caching system with 24-hour refresh interval
+- Integrated background handling with the existing animation sequences
+- Added fallback mechanism for API failures
+
+## [0.9.2] - 2025-07-20
+
+### Fixed
+- Fixed intervention page layout to properly fill the viewport (90vw/90vh)
+- Enhanced quirky message to display at a larger size (5rem) in the center of the container
+- Improved initial animation sequence for cleaner user experience
+- Removed premature display of task content and snooze options in the first animation stage
+- Implemented smooth transition animation from large centered message to smaller top-aligned message
+- Added animated fade-in for task content after 3-second delay
+- Improved task card styling with proper alignment and spacing
+- Implemented polished snooze transition with fade-out of main content and fade-in of snooze options
+- Added sassy messaging to the snooze view with "Fine, ignore me then... 🙄" heading
+- Enhanced snooze guilt message with red text and prominent text-shadow effect
+- Fixed snooze button styling and interaction
+
+## [0.9.1] - 2025-07-20
+
+### Added
+- Dynamic background system for intervention page with "Dark Nature" themed images
+- Image caching system that stores background images for 24 hours
+- New frosted glass container effect with subtle animation on the intervention page
+- Animated quirky message system with random motivational messages
+- Styled task list showing the top 3 incomplete tasks with due dates and priority levels
+- Timed animation sequence for content elements on intervention page
+- "I'll Do Later!" button with hover effect
+- Interactive snooze transition with smooth animation between views
+- Three snooze duration options (10 minutes, 30 minutes, 1 hour)
+- "Guilt message" showing total snooze time used for the day
+- Snooze history tracking in chrome.storage.local
+
+### Changed
+- Completely redesigned intervention page foundation with clean HTML structure
+- Replaced static background with dynamic background images from Pexels API or Nudge API
+- Implemented animated content container with 600ms delay and smooth fade-in effect
+- Enhanced task display with organized meta information and improved styling
+- Improved snooze UX with better styled buttons and smoother transitions
+- Enhanced user flow with animated cross-fade between task view and snooze options
+- Added multi-stage animation choreography with 4-second delay between message and tasks
+
 ## [0.9.0] - 2025-07-19
 
 ### Added

@@ -1,46 +1,101 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 body {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-color: #1a1a2e;
-    color: #e0e0e0;
     font-family: 'Poppins', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    text-align: center;
     height: 100vh;
     margin: 0;
-}
-.container { max-width: 600px; padding: 2rem; }
-h1 { font-size: 3rem; color: #7f5af0; margin-bottom: 1rem; }
-p { font-size: 1.2rem; opacity: 0.8; }
-ul { list-style: none; padding: 0; margin-top: 2rem; }
-li { font-size: 1.1rem; padding: 0.5rem; background: rgba(255, 255, 255, 0.05); border-radius: 4px; margin-bottom: 0.5rem; }
-
-/* Snooze section styles */
-.snooze-section {
-    margin-top: 3rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 1.5rem;
-}
-.snooze-buttons button {
-    background: #7f5af0;
+    overflow: hidden;
     color: #fff;
-    border: none;
-    padding: 0.8rem 1.2rem;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 0.5rem;
-    font-weight: bold;
 }
-.snooze-buttons button:hover {
-    background: #9d85e4;
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: -1;
 }
+.container {
+    width: 90vw;
+    height: 90vh;
+    background: rgba(20, 20, 35, 0.25);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 500ms ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    box-sizing: border-box;
+    position: relative; /* For absolute positioning of children */
+}
+.container.visible { opacity: 1; transform: scale(1); }
+.container.tasks-visible { justify-content: center; }
+
+h1#quirky-message {
+    font-size: 5rem;
+    font-weight: 500;
+    text-align: center;
+    margin: 0;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+h1#quirky-message.visible { opacity: 1; transform: scale(0.75); }
+.container.tasks-visible h1#quirky-message { font-size: 2.5rem; margin-bottom: 1rem; }
+
+#task-content-wrapper {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(30px);
+    transition: opacity 600ms ease-in-out, transform 600ms ease-in-out;
+}
+.container.tasks-visible #task-content-wrapper { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+.tasks-card { width: 100%; max-width: 550px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 0.5rem 1.5rem; margin-top: 1rem; text-align: left; box-sizing: border-box; }
+#top-tasks-list { list-style: none; padding: 0; margin: 0; }
+#top-tasks-list li { display: flex; flex-direction: column; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.task-title { font-weight: 600; font-size: 0.8rem;}
+#top-tasks-list li:last-child { border-bottom: none; }
+.task-meta { font-size: 0.8rem; opacity: 0.7; margin-top: 0.2rem; }
+
+#show-snooze-btn { margin-top: 2rem; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.8rem 1.5rem; border-radius: 24px; cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: background-color 0.2s; }
+#show-snooze-btn:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* --- Snooze Section Styling --- */
+.snooze-section {
+    width: calc(100% - 6rem);
+    text-align: center;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+    transition: opacity 400ms ease-out, transform 400ms ease-out;
+}
+.snooze-section.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.snooze-section h3 { font-size: 2rem; margin-bottom: 2.5rem; }
+.snooze-section p { opacity: 0.8; margin-bottom: 1rem; }
+.snooze-buttons button {padding: 0.8rem 1.2rem; margin: 1rem 0.5rem 0rem 0.5rem; background: rgba(255, 255, 255, 0.4); color: #fff; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 24px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: background-color 0.2s; }
+.snooze-buttons button:hover { background: rgba(255, 255, 255, 0.6); }
 #snooze-guilt {
-    margin-top: 1.5rem;
-    color: #ff8c8c;
+    margin-top: 1rem;
     font-style: italic;
-}
-.hidden {
-    display: none;
+    font-weight: bold;
+    color: #FF1111;
+    text-shadow: 3px 3px 4px rgba(0, 0, 0, 0.99);
 }
