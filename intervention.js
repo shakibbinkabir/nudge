@@ -16,13 +16,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const PEXELS_API_URL = `https://api.pexels.com/v1/search?query=${encodeURIComponent(PEXELS_QUERY)}&per_page=20`;
     const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // Cache for 24 hours
 
-    const setBackground = (imageUrl) => {
+
+    // Attribution container for Pexels credit
+    let attributionContainer = document.getElementById('attribution-container');
+    if (!attributionContainer) {
+        attributionContainer = document.createElement('div');
+        attributionContainer.id = 'attribution-container';
+        attributionContainer.style.position = 'fixed';
+        attributionContainer.style.bottom = '10px';
+        attributionContainer.style.right = '20px';
+        attributionContainer.style.background = 'rgba(0,0,0,0.4)';
+        attributionContainer.style.color = '#fff';
+        attributionContainer.style.fontSize = '13px';
+        attributionContainer.style.padding = '4px 10px';
+        attributionContainer.style.borderRadius = '8px';
+        attributionContainer.style.zIndex = '1000';
+        attributionContainer.style.fontFamily = 'inherit';
+        document.body.appendChild(attributionContainer);
+    }
+
+    // Set background and show Pexels credit if available
+    const setBackground = (imageUrl, photographer, photographerUrl) => {
         document.body.style.backgroundImage = `url(${imageUrl})`;
+        if (photographer && photographerUrl) {
+            attributionContainer.innerHTML = `Photo by <a href="${photographerUrl}" target="_blank" style="color:#fff;text-decoration:underline;">${photographer}</a> on <a href="https://www.pexels.com" target="_blank" style="color:#fff;text-decoration:underline;">Pexels</a>`;
+        } else {
+            attributionContainer.innerHTML = 'None';
+        }
     };
 
     const fetchAndCacheBackground = async (keys) => {
         try {
-            let imageUrlToCache;
+            let imageUrlToCache, photographer, photographerUrl;
             if (keys.userPexelsKey) {
                 const response = await fetch(PEXELS_API_URL, { headers: { 'Authorization': keys.userPexelsKey } });
                 const data = await response.json();
@@ -30,17 +55,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.photos && data.photos.length > 0) {
                     const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
                     imageUrlToCache = photo.src.large2x;
+                    photographer = photo.photographer;
+                    photographerUrl = photo.photographer_url;
                 }
             } else if (keys.nudgeApiKey) {
                 const response = await fetch(NUDGE_API_URL, { headers: { 'X-API-KEY': keys.nudgeApiKey } });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Nudge API error');
                 imageUrlToCache = data.image_url;
+                photographer = data.photographer;
+                photographerUrl = data.photographer_url;
             }
 
             if (imageUrlToCache) {
-                chrome.storage.local.set({ interventionBg: { url: imageUrlToCache, timestamp: Date.now() } });
-                setBackground(imageUrlToCache);
+                chrome.storage.local.set({ interventionBg: { url: imageUrlToCache, timestamp: Date.now(), photographer, photographerUrl } });
+                setBackground(imageUrlToCache, photographer, photographerUrl);
             }
         } catch (error) {
             console.error("Failed to fetch new intervention background:", error);
@@ -53,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cache = result.interventionBg;
 
             if (cache && (now - cache.timestamp < CACHE_DURATION_MS)) {
-                setBackground(cache.url);
+                setBackground(cache.url, cache.photographer, cache.photographerUrl);
             } else {
                 fetchAndCacheBackground({ nudgeApiKey: result.nudgeApiKey, userPexelsKey: result.userPexelsKey });
             }
@@ -158,7 +187,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const getDayWithSuffix = (d) => (d > 3 && d < 21) ? `${d}th` : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][d % 10];
+    // Returns day with ordinal suffix (1st, 2nd, 3rd, 4th, etc.)
+    const getDayWithSuffix = (d) => {
+        if (d > 3 && d < 21) return `${d}th`;
+        switch (d % 10) {
+            case 1: return `${d}st`;
+            case 2: return `${d}nd`;
+            case 3: return `${d}rd`;
+            default: return `${d}th`;
+        }
+    };
     const sortTasks = (arr) => arr.sort((a, b) => (a.completed - b.completed) || (a.priority - b.priority) || ((a.deadline ? new Date(a.deadline) : Infinity) - (b.deadline ? new Date(b.deadline) : Infinity)) || (a.id - b.id));
 
     chrome.storage.local.get(['tasks'], (result) => {
@@ -173,8 +211,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const taskText = `<span>${task.text}</span>`;
                 let metaParts = [];
                 if (task.deadline) {
-                    const date = new Date(task.deadline + 'T00:00:00');
-                    metaParts.push(`Due on: ${getDayWithSuffix(date.getDate())} ${date.toLocaleDateString('en-US', { month: 'long' })}`);
+                    let date = new Date(task.deadline);
+                    if (isNaN(date.getTime())) {
+                        // Try fallback with T00:00:00
+                        date = new Date(task.deadline + 'T00:00:00');
+                    }
+                    if (!isNaN(date.getTime())) {
+                        metaParts.push(`Due on: ${getDayWithSuffix(date.getDate())} ${date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`);
+                    } else {
+                        metaParts.push('Due date: Invalid');
+                    }
                 }
                 metaParts.push(`Priority: ${{1: 'High', 2: 'Medium', 3: 'Low'}[task.priority]}`);
                 const taskMeta = `<span class="task-meta">${metaParts.join(' | ')}</span>`;
