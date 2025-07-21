@@ -273,3 +273,29 @@ input:checked ~ .collapsible-content {
 .changelog-body h1, .changelog-body h2, .changelog-body h3 { margin-top: 1rem; }
 .changelog-body ul, .changelog-body ol { padding-left: 1.5rem; }
 .changelog-body code { background: var(--input-bg); padding: 0.2rem 0.4rem; border-radius: 4px; }
+
+/* Smart Blacklist Actions */
+.actions-col {
+    width: 20rem; /* Adjust width to fit buttons */
+    text-align: center !important;
+}
+
+.action-cell {
+    text-align: center !important;
+}
+
+.action-cell .btn {
+    margin-left: 0.5rem;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-sm {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+}

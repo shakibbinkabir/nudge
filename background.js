@@ -139,8 +139,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 console.log(`Checking hostname: ${hostname} against blacklist`);
                 
                 // Check if any blacklisted domain matches the hostname
-                const isBlacklisted = blacklist.some(domain => {
-                    if (!domain || domain.trim() === '') return false;
+                const isBlacklisted = blacklist.some(item => {
+                    // Handle both old string format and new object format
+                    const domain = typeof item === 'string' ? item : item.domain;
+                    const isActive = typeof item === 'string' ? true : item.active;
+                    
+                    // Only check active domains
+                    if (!isActive || !domain || domain.trim() === '') return false;
                     
                     // Clean up domain input (remove https://, www., etc.)
                     const cleanDomain = domain.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
@@ -161,7 +166,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                                                hostnameToCheck.includes(`.${cleanDomain}.`));
                     
                     const match = exactMatch || subdomainMatch || domainWithPathMatch;
-                    console.log(`Comparing: '${hostnameToCheck}' with '${cleanDomain}' - Match: ${match} (exact: ${exactMatch}, subdomain: ${subdomainMatch}, domain-path: ${domainWithPathMatch})`);
+                    console.log(`Comparing: '${hostnameToCheck}' with '${cleanDomain}' (active: ${isActive}) - Match: ${match} (exact: ${exactMatch}, subdomain: ${subdomainMatch}, domain-path: ${domainWithPathMatch})`);
                     return match;
                 });
                 

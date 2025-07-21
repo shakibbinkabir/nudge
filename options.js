@@ -83,48 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Initialize blacklist table
-    const loadBlacklist = () => {
-        chrome.storage.local.get(['blacklist'], (result) => {
-            const blacklist = result.blacklist || [];
-            
-            // Clear the table
-            blacklistTableBody.innerHTML = '';
-            
-            if (blacklist.length === 0) {
-                // Show empty state
-                const emptyRow = document.createElement('tr');
-                emptyRow.innerHTML = `<td colspan="2" style="text-align: center; color: var(--text-secondary);">
-                    No domains added yet. Add your first site below.
-                </td>`;
-                blacklistTableBody.appendChild(emptyRow);
-            } else {
-                // Add each domain to the table
-                blacklist.forEach(domain => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${domain}</td>
-                        <td>
-                            <button class="btn btn-danger remove-domain" data-domain="${domain}">
-                                Remove
-                            </button>
-                        </td>
-                    `;
-                    blacklistTableBody.appendChild(row);
-                });
-                
-                // Add event listeners to remove buttons
-                document.querySelectorAll('.remove-domain').forEach(button => {
-                    button.addEventListener('click', function() {
-                        removeDomain(this.dataset.domain);
-                    });
-                });
-            }
-        });
-    };
+    // This is now handled by initializeBlacklist() in the BLACKLIST LOGIC section
 
     // Run initializations
     initializeApiState();
-    loadBlacklist();
 
     // =================================================================
     //  NAVIGATION LOGIC
@@ -145,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Reload blacklist when viewing that section
             if (targetId === 'distractions') {
-                loadBlacklist();
+                renderBlacklist();
             }
         });
     });
@@ -383,75 +345,93 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCollapsibleVisibility();
     
     // =================================================================
-    //  BLACKLIST MANAGEMENT
+    //  BLACKLIST LOGIC (REFACTORED for Smart Toggles)
     // =================================================================
-    
-    // Add a new domain to the blacklist
-    blacklistForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const domain = blacklistInput.value.trim();
-        if (!domain) {
-            status3.textContent = 'Please enter a valid domain';
-            status3.className = 'status-message error';
-            return;
+    let blacklist = []; // Will be an array of objects: { domain: '..', active: true }
+
+    const renderBlacklist = () => {
+        blacklistTableBody.innerHTML = '';
+        if (blacklist.length === 0) {
+            blacklistTableBody.innerHTML = '<tr><td colspan="2" class="empty-table-cell">Your distraction list is empty.</td></tr>';
+        } else {
+            blacklist.forEach(item => {
+                const row = document.createElement('tr');
+                const blockBtnDisabled = item.active ? 'disabled' : '';
+                const unblockBtnDisabled = !item.active ? 'disabled' : '';
+                
+                row.innerHTML = `
+                    <td>${item.domain}</td>
+                    <td class="action-cell">
+                        <button class="btn btn-secondary btn-sm toggle-block-btn" data-domain="${item.domain}" ${blockBtnDisabled}>Block</button>
+                        <button class="btn btn-secondary btn-sm toggle-block-btn" data-domain="${item.domain}" ${unblockBtnDisabled}>Unblock</button>
+                        <button class="btn btn-danger btn-sm delete-domain-btn" data-domain="${item.domain}">Delete</button>
+                    </td>
+                `;
+                blacklistTableBody.appendChild(row);
+            });
         }
-        
-        // Get current blacklist and add the new domain
-        chrome.storage.local.get(['blacklist'], (result) => {
-            const blacklist = result.blacklist || [];
-            
-            // Check if domain already exists
-            if (blacklist.includes(domain)) {
-                status3.textContent = 'This domain is already in your list';
-                status3.className = 'status-message error';
-                return;
-            }
-            
-            // Add the new domain and save
-            blacklist.push(domain);
-            chrome.storage.local.set({ blacklist }, () => {
-                status3.textContent = 'Domain added successfully';
-                status3.className = 'status-message success';
-                blacklistInput.value = ''; // Clear input
-                loadBlacklist(); // Refresh the list
-                
-                // Clear the success message after a delay
-                setTimeout(() => {
-                    status3.textContent = '';
-                    status3.className = 'status-message';
-                }, 3000);
-            });
-        });
-    });
-    
-    // Remove a domain from the blacklist
-    const removeDomain = (domain) => {
-        chrome.storage.local.get(['blacklist'], (result) => {
-            const blacklist = result.blacklist || [];
-            const newBlacklist = blacklist.filter(d => d !== domain);
-            
-            chrome.storage.local.set({ blacklist: newBlacklist }, () => {
-                status3.textContent = 'Domain removed successfully';
-                status3.className = 'status-message success';
-                loadBlacklist(); // Refresh the list
-                
-                // Clear the success message after a delay
-                setTimeout(() => {
-                    status3.textContent = '';
-                    status3.className = 'status-message';
-                }, 3000);
-            });
+    };
+
+    const saveBlacklist = () => {
+        chrome.storage.local.set({ blacklist: blacklist }, () => {
+            console.log('Blacklist saved to local storage.');
+            renderBlacklist(); // Re-render to reflect any changes
         });
     };
 
+    const initializeBlacklist = () => {
+        chrome.storage.local.get(['blacklist'], (result) => {
+            // Migration: Check if the stored list is the old string format
+            if (result.blacklist && result.blacklist.length > 0 && typeof result.blacklist[0] === 'string') {
+                console.log('Migrating old blacklist format...');
+                blacklist = result.blacklist.map(domain => ({ domain: domain, active: true }));
+                saveBlacklist(); // Save the new format immediately
+            } else {
+                blacklist = result.blacklist || [];
+            }
+            renderBlacklist();
+        });
+    };
+
+    // --- Event Handlers ---
+    blacklistForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newDomain = blacklistInput.value.trim();
+        if (newDomain && !blacklist.some(item => item.domain === newDomain)) {
+            blacklist.push({ domain: newDomain, active: true });
+            saveBlacklist();
+            blacklistInput.value = '';
+        }
+    });
+
+    blacklistTableBody.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target && target.matches('button')) {
+            const domain = target.dataset.domain;
+            
+            if (target.classList.contains('delete-domain-btn')) {
+                blacklist = blacklist.filter(item => item.domain !== domain);
+            }
+            if (target.classList.contains('toggle-block-btn')) {
+                blacklist = blacklist.map(item => 
+                    item.domain === domain ? { ...item, active: !item.active } : item
+                );
+            }
+            saveBlacklist();
+        }
+    });
+
+    // Replace the previous initializeBlacklist() call in your main initializeApp function
+    initializeBlacklist();
+
     // =================================================================
-    //  ABOUT SECTION LOGIC
+    //  ABOUT SECTION LOGIC 
     // =================================================================
     const GITHUB_REPO = 'shakibbinkabir/nudge';
 
     const initializeAboutSection = () => {
         const installedVersionEl = document.getElementById('installed-version');
+        const aboutInstalledVersionEl = document.getElementById('about-installed-version');
         const latestVersionEl = document.getElementById('latest-version');
         const updateBtn = document.getElementById('update-btn');
         const changelogPrompt = document.getElementById('changelog-prompt');
@@ -463,6 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const manifest = chrome.runtime.getManifest();
         const installedVersion = manifest.version;
         installedVersionEl.textContent = `v${installedVersion}`;
+        aboutInstalledVersionEl.textContent = `v${installedVersion}`;
+        console.log("Installed version:", installedVersion);
 
         // 2. Fetch latest version from GitHub
         fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`)
