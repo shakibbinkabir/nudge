@@ -99,3 +99,29 @@ h1#quirky-message.visible { opacity: 1; transform: scale(0.75); }
     color: #FF1111;
     text-shadow: 3px 3px 4px rgba(0, 0, 0, 0.99);
 }
+#attribution-container {
+    position: fixed;
+    bottom: 16px;
+    right: 24px;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    font-size: 10px;
+    padding: 6px 14px;
+    border-radius: 10px;
+    z-index: 1002;
+    font-family: inherit;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+    opacity: 0.92;
+    pointer-events: auto;
+}
+#attribution-container a {
+    color: #fff !important;
+    text-decoration: none !important;
+    transition: font-weight 0.2s, color 0.2s text-decoration 0.2s;
+}
+#attribution-container a:hover {
+    text-decoration: underline !important;
+    font-weight: 600 !important;
+}

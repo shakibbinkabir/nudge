@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         attributionContainer.innerHTML = `
-            Photo by <a href="${bgData.photographer_url}" target="_blank">${bgData.photographer}</a>
+            Photo by <a href="${bgData.photographer_url}" target="_blank">${bgData.photographer}</a> on <a href="https://pexels.com" target="_blank">Pexels</a>
         `;
     };
 

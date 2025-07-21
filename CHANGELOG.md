@@ -2,6 +2,68 @@
 
 All notable changes to the Nudge Chrome Extension will be documented in this file.
 
+## [0.9.9] - 2025-07-22
+
+### Changed
+- **Project Restructuring:** Refactored the entire project directory structure for better organization, scalability, and maintainability in preparation for the v1.0 launch.
+- Moved all HTML, CSS, JavaScript, and asset files into dedicated folders (`/pages`, `/css`, `/js`, `/assets`).
+- Updated `manifest.json` and all internal file path references to support the new structure.
+- Renamed `script.js` to `newtab.js` for improved clarity.
+
+## [0.9.8] - 2025-07-22
+
+### Added
+- Displayed favicons next to each domain in the Distractions list for better visual identification.
+- Implemented a real-time favicon preview in the 'Add Domain' input field that appears as you type.
+- Created an automatic migration process to update the old blacklist data structure to the new format.
+
+### Changed
+- Overhauled the Distractions page actions, replacing the single 'Remove' button with a more flexible **Block/Unblock** toggle and a separate **Delete** button.
+- Upgraded the blacklist's underlying data structure to support toggling domains on or off.
+
+### Fixed
+- Implemented robust validation for user-provided Pexels API keys to verify the key with Pexels *before* saving it, preventing invalid keys.
+
+## [0.9.7] - 2025-07-22
+
+### Changed
+- Redesigned the "Disconnected" API state UI with collapsible toggle sections
+- Implemented mutual exclusivity for API connection options with toggle switches
+- Added smooth animations for form section transitions
+- Improved user experience for API setup with clearer separation between options
+- Fixed issue with collapsible toggle sections not working properly in the API settings
+- Improved JavaScript implementation for toggle switches to ensure compatibility
+- Enhanced user experience by making form toggle animations more reliable
+
+## [0.9.6] - 2025-07-21
+
+### Added
+- Implemented fully functional API key forms in settings page
+- Added email registration and OTP verification workflow for Nudge API
+- Added form for saving personal Pexels API keys
+- Implemented API state management with dynamic UI updates
+- Added immediate UI feedback after form submissions
+- Added error handling for API requests and form validation
+
+## [0.9.5] - 2025-07-21
+
+### Added
+- Completely redesigned settings page with modern "Tech Dashboard" UI
+- New two-column layout with sidebar navigation
+- Implemented "frosted glass" card design with dark theme
+- Added teal/cyan accent color scheme
+- Separate sections for API Keys, Distractions, and About
+- Improved organization of settings interface
+- Implemented sidebar navigation functionality
+- Added interactive tab switching between settings sections
+- Improved UX with visual highlighting of active navigation items
+- Implemented dynamic "State-Aware" API Keys view in settings page
+- Added automatic detection of API connection type (Nudge API or Pexels)
+- Display appropriate UI based on user's connection status
+- Implemented disconnect functionality for both API options
+- Added masked key display for security when using Pexels API
+- Usage statistics display for Nudge API users
+
 ## [0.9.4] - 2025-07-20
 
 ### Enhanced

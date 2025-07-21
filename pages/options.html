@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nudge Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/options.css">
+</head>
+<body>
+    <div class="settings-layout">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="logo-container">
+                <img src="../assets/icons/nudge-48x48.png" alt="Nudge Icon" class="logo">
+                <div class="header-text">
+                <h1>Nudge</h1>
+                <p class="version" id="installed-version"></p>
+                </div>
+            </div>
+            </header>
+            <nav>
+                <a href="#" class="sidebar-nav-item active" data-target="api-keys">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>
+                    <span>API Keys</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" data-target="distractions">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <span>Distractions</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" data-target="about">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="16" y2="12"></line><line x1="12" x2="12.01" y1="8" y2="8"></line></svg>
+                    <span>About</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section id="api-keys" class="content-section active">
+                <div class="content-header">
+                    <h2>API Keys & Backgrounds</h2>
+                    <p>Manage how Nudge loads beautiful background images with the help of <a href="https://pexels.com" style="color: var(--text-primary); text-decoration: none;" target="_blank">Pexels</a></p>
+                </div>
+
+                <div id="state-connected-nudge" class="api-state hidden">
+                    <div class="glass-card">
+                        <h3>Nudge API Status</h3>
+                        <div class="status-display"><span style="margin-right: 0.5rem;">Connected as:</span><strong id="connected-email-display"></strong></div>
+                        <!-- <div class="usage-display">
+                            <label>Monthly Usage</label>
+                            <div class="progress-bar-wrapper"><div id="usage-bar-fill" class="progress-bar-fill"></div></div>
+                            <span id="usage-text"></span>
+                        </div> -->
+                        <button id="disconnect-nudge-btn" class="btn btn-danger">Disconnect</button>
+                    </div>
+                </div>
+
+                <div id="state-connected-pexels" class="api-state hidden">
+                    <div class="glass-card">
+                        <h3>Pexels API Status</h3>
+                        <div class="status-display"><span>Your Personal Key:</span><strong id="masked-pexels-key-display"></strong></div>
+                        <button id="disconnect-pexels-btn" class="btn btn-danger">Disconnect</button>
+                    </div>
+                </div>
+
+                <div id="state-disconnected" class="api-state hidden">
+                    <div class="glass-card">
+                        <p class="card-subtitle">For loading background images, please select and configure one of the options below.</p>
+                        
+                        <div class="api-option">
+                            <div class="option-header">
+                                <h3>Nudge API Key</h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="nudge-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <p class="option-description">Get a free, rate-limited (16/month) API key from us.</p>
+                            <div class="collapsible-content">
+                                <div class="card">
+                                    <form id="register-form">
+                                        <input type="email" id="email-input" placeholder="you@example.com" required>
+                                        <button type="submit" class="btn">Get Verification Code</button>
+                                    </form>
+                                    <form id="verify-form" class="hidden">
+                                        <input type="text" id="otp-input" placeholder="Enter 6-digit code" required>
+                                        <button type="submit" class="btn">Verify & Save Key</button>
+                                    </form>
+                                    <div id="status-message-1" class="status-message"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="api-option">
+                            <div class="option-header">
+                                <h3>Use Your Own Pexels Key</h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="pexels-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <p class="option-description">For unlimited backgrounds and maximum privacy.</p>
+                            <div class="collapsible-content">
+                                <div class="card">
+                                    <form id="byok-form">
+                                        <input type="text" id="pexels-key-input" placeholder="Paste your Pexels API Key" required>
+                                        <button type="submit" class="btn">Save Pexels Key</button>
+                                    </form>
+                                    <div id="status-message-2" class="status-message"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="distractions" class="content-section">
+                <div class="content-header">
+                    <h2>Distraction Management</h2>
+                    <p>Add sites you want Nudge to intercept. They will be added to your blacklist.</p>
+                </div>
+                <div class="glass-card">
+                    <h3>Blocked Domains</h3>
+                    <div class="table-wrapper">
+                        <table class="distraction-table">
+                            <thead>
+                                <tr>
+                                    <th class="favicon-col"></th>
+                                    <th>Domain</th>
+                                    <th class="actions-col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blacklist-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                    <form id="blacklist-form" class="add-form">
+                        <div class="input-with-favicon">
+                            <img id="favicon-preview" src="" alt="" class="favicon hidden"/>
+                            <input type="text" style="width: 99%;" id="blacklist-input" placeholder="e.g., instagram.com">
+                        </div>
+                        <button type="submit" class="btn" style="padding: 0.8rem 2rem;">Add</button>
+                    </form>
+                    <div id="status-message-3" class="status-message"></div>
+                </div>
+            </section>
+
+            <section id="about" class="content-section">
+                <div class="content-header">
+                    <h2>About Nudge</h2>
+                    <p>Your intelligent sidekick against procrastination.</p>
+                </div>
+
+                <!-- Version Check Module -->
+                <div class="glass-card">
+                    <h3>Version Status</h3>
+                    <div id="version-checker" class="version-checker">
+                        <div class="version-info">
+                            <span class="version-label">Installed Version</span>
+                            <strong id="about-installed-version">v0.0.0</strong>
+                        </div>
+                        <div class="version-info">
+                            <span class="version-label">Latest Version</span>
+                            <strong id="latest-version">Checking...</strong>
+                        </div>
+                        <a href="#" id="update-btn" class="btn hidden" target="_blank">Update Now</a>
+                    </div>
+                    <div id="changelog-prompt" class="changelog-prompt hidden">
+                        <a href="#">Click here to see what's new</a>
+                    </div>
+                </div>
+
+                <!-- Quick Start Guide -->
+                <div class="glass-card">
+                    <h3>Quick Start Guide</h3>
+                    <ol class="quick-guide">
+                        <li>Go to the <strong>API Keys</strong> tab to connect your account.</li>
+                        <li>Visit the <strong>Distractions</strong> tab to add websites you want to block.</li>
+                        <li>Open a new tab to see your dashboard and start adding tasks!</li>
+                    </ol>
+                </div>
+
+                <!-- Footer / Branding -->
+                <div class="about-footer">
+                    <p>A product from <a class="link-hover" href="https://lab.shakibbinkabir.me" style="color: var(--text-secondary); text-decoration: none;" target="_blank"><strong>Lab by Shakib Bin Kabir</strong></a></p>
+                    <p>Developer: <a class="link-hover" href="https://shakibbinkabir.me" style="color: var(--text-secondary); text-decoration: none;" target="_blank"><strong>Shakib Bin Kabir</strong></a> | License: <a class="link-hover" href="https://github.com/shakibbinkabir/nudge?tab=MIT-1-ov-file" style="color: var(--text-secondary); text-decoration: none;" target="_blank"><strong>MIT</strong></a></p>
+                </div>
+
+                <!-- Changelog Modal (Initially Hidden) -->
+                <div id="changelog-modal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>What's New</h3>
+                            <button id="close-modal-btn" class="close-btn">&times;</button>
+                        </div>
+                        <div id="changelog-body" class="changelog-body">
+                            <!-- Release notes will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+<script src="../js/lib/showdown.min.js"></script>
+<script src="../js/options.js"></script>
+</body>
+</html>

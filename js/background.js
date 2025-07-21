@@ -73,7 +73,7 @@ chrome.runtime.onInstalled.addListener((details) => {
             console.log('No existing blacklist found, initializing empty array');
             updates.blacklist = [];
         } else {
-            console.log('Existing blacklist found:', result.blacklist);
+            // console.log('Existing blacklist found:', result.blacklist);
         }
         
         // Initialize snoozes if needed
@@ -90,7 +90,7 @@ chrome.runtime.onInstalled.addListener((details) => {
         
         // Initialize user profile if needed
         if (!result.userProfile) {
-            console.log('No existing user profile found, will be initialized when the user first visits the new tab page');
+            // console.log('No existing user profile found, will be initialized when the user first visits the new tab page');
         }
         
         // Only save if we have updates to make
@@ -107,103 +107,67 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 // Listen for tab updates
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    // We only want to act when a URL is being loaded
-    if (changeInfo.url) {
-        console.log(`Tab ${tabId} navigating to: ${changeInfo.url}`);
-        
-        // Skip checking chrome-extension:// URLs entirely to avoid potential redirect loops
-        if (changeInfo.url.startsWith('chrome-extension://')) {
-            console.log(`Skipping chrome-extension URL: ${changeInfo.url}`);
+    // Only act when the page has completed loading
+    if (changeInfo.status === 'complete') {
+        const url = tab.url;
+        if (!url) {
             return;
         }
-        
+        // Skip chrome-extension URLs to prevent redirect loops
+        if (url.startsWith('chrome-extension://')) {
+            return;
+        }
         // Get the blacklist and snoozes from storage
         chrome.storage.local.get(['blacklist', 'snoozes'], (result) => {
             const blacklist = result.blacklist || [];
             const snoozes = result.snoozes || {};
-            
-            console.log('Current blacklist:', blacklist);
-            
             if (blacklist.length === 0) {
-                console.log('Blacklist is empty, allowing navigation');
                 return;
             }
-            
-            // Check if the new URL matches any domain in the blacklist
             try {
                 // Create a URL object to extract the hostname
-                const url = new URL(changeInfo.url);
-                const hostname = url.hostname;
-                
-                console.log(`Checking hostname: ${hostname} against blacklist`);
-                
+                const urlObj = new URL(url);
+                const hostname = urlObj.hostname;
                 // Check if any blacklisted domain matches the hostname
-                const isBlacklisted = blacklist.some(domain => {
-                    if (!domain || domain.trim() === '') return false;
-                    
-                    // Clean up domain input (remove https://, www., etc.)
+                const isBlacklisted = blacklist.some(item => {
+                    const domain = typeof item === 'string' ? item : item.domain;
+                    const isActive = typeof item === 'string' ? true : item.active;
+                    if (!isActive || !domain || domain.trim() === '') return false;
                     const cleanDomain = domain.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
-                    
-                    // Better domain matching - check for exact domain or subdomain
                     const hostnameToCheck = hostname.toLowerCase();
-                    
-                    // Case 1: Exact domain match (e.g., "facebook.com" matches "facebook.com")
                     const exactMatch = hostnameToCheck === cleanDomain;
-                    
-                    // Case 2: Domain with subdomain (e.g., "www.facebook.com" or "m.facebook.com" matches "facebook.com")
                     const subdomainMatch = hostnameToCheck.endsWith(`.${cleanDomain}`);
-                    
-                    // Case 3: Domain with path (special case for exact domains without TLD like "facebook")
                     const domainWithPathMatch = cleanDomain && !cleanDomain.includes('.') && 
                                               (hostnameToCheck === cleanDomain || 
                                                hostnameToCheck.startsWith(`${cleanDomain}.`) || 
                                                hostnameToCheck.includes(`.${cleanDomain}.`));
-                    
                     const match = exactMatch || subdomainMatch || domainWithPathMatch;
-                    console.log(`Comparing: '${hostnameToCheck}' with '${cleanDomain}' - Match: ${match} (exact: ${exactMatch}, subdomain: ${subdomainMatch}, domain-path: ${domainWithPathMatch})`);
                     return match;
                 });
-                
                 if (isBlacklisted) {
-                    console.log(`BLOCKED: ${changeInfo.url} (hostname: ${hostname})`);
-                    
-                    // Check for an active snooze on this domain
                     if (snoozes[hostname] && Date.now() < snoozes[hostname]) {
-                        console.log(`Snooze is active for ${hostname} until ${new Date(snoozes[hostname]).toLocaleTimeString()}. Allowing access.`);
                         return; // Allow navigation to continue
                     } else {
-                        // Clear expired snoozes
                         if (snoozes[hostname]) {
-                            console.log(`Snooze for ${hostname} has expired.`);
                             delete snoozes[hostname];
                             chrome.storage.local.set({ snoozes: snoozes });
                         }
-                        
-                        // Check if all tasks are completed or no tasks exist before showing intervention
                         chrome.storage.local.get(['tasks'], (taskResult) => {
                             const tasks = taskResult.tasks || [];
                             const allTasksCompleted = tasks.length > 0 && tasks.every(task => task.completed);
                             const noTasks = tasks.length === 0;
-                            
                             if (allTasksCompleted || noTasks) {
-                                console.log(`Skipping intervention: ${allTasksCompleted ? 'All tasks completed' : 'No tasks available'}`);
                                 return; // Allow navigation to continue
                             }
-                            
-                            // Generate the intervention page URL with originalUrl parameter
-                            const interventionUrl = chrome.runtime.getURL("intervention.html") + "?originalUrl=" + encodeURIComponent(changeInfo.url);
-                            
-                            // Redirect the tab to our intervention page
-                            console.log(`Redirecting to intervention page: ${interventionUrl}`);
+                            const interventionUrl = chrome.runtime.getURL("../pages/intervention.html") + "?originalUrl=" + encodeURIComponent(url);
                             chrome.tabs.update(tabId, { url: interventionUrl });
                         });
                     }
-                } else {
-                    console.log(`ALLOWED: ${changeInfo.url} (hostname: ${hostname})`);
                 }
             } catch (error) {
-                console.error('Error parsing URL:', error);
+                // Ignore URL parse errors
             }
         });
     }
