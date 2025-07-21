@@ -3,75 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <title>Nudge Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="options.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Nudge Settings</h1>
-        <p>Choose how you want to load background images.</p>
+    <div class="settings-layout">
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <h1>Nudge</h1>
+                <p class="version">v0.9.8</p>
+            </header>
+            <nav>
+                <a href="#" class="sidebar-nav-item active" data-target="api-keys">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>
+                    <span>API Keys</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" data-target="distractions">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <span>Distractions</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" data-target="about">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="16" y2="12"></line><line x1="12" x2="12.01" y1="8" y2="8"></line></svg>
+                    <span>About</span>
+                </a>
+            </nav>
+        </aside>
 
-        <div class="card">
-            <h2>Option 1: Get a Free API Key</h2>
-            
-            <!-- Connected email view - initially hidden -->
-            <div id="connected-email-view" class="hidden">
-                <p class="success">✓ Connected with <span id="connected-email-display">email@example.com</span></p>
-                <div class="button-group">
-                    <button id="remove-email-btn" class="secondary-btn">Remove Connection</button>
-                    <button id="change-email-btn" class="secondary-btn">Change Email</button>
+        <main class="main-content">
+            <section id="api-keys" class="content-section active">
+                <div class="content-header">
+                    <h2>API Keys & Backgrounds</h2>
+                    <p>Manage how Nudge loads beautiful background images.</p>
                 </div>
-            </div>
-            
-            <!-- Registration form - shown by default unless connected -->
-            <div id="registration-view">
-                <p>Get a free, rate-limited API key from us. We'll send a code to your email to verify.</p>
-                <form id="register-form">
-                    <input type="email" id="email-input" placeholder="your-email@example.com" required>
-                    <button type="submit">Get Verification Code</button>
-                </form>
-                <form id="verify-form" class="hidden">
-                    <input type="text" id="otp-input" placeholder="Enter 6-digit code" required>
-                    <button type="submit">Verify & Save Key</button>
-                </form>
-                <div id="status-message-1"></div>
-            </div>
-        </div>
 
-        <div class="card">
-            <h2>Option 2: Use Your Own Pexels Key</h2>
-            
-            <!-- Connected Pexels view - initially hidden -->
-            <div id="connected-pexels-view" class="hidden">
-                <p class="success">✓ Using your own Pexels API key</p>
-                <div class="button-group">
-                    <button id="remove-pexels-btn" class="secondary-btn">Remove Key</button>
-                    <button id="change-pexels-btn" class="secondary-btn">Update Key</button>
+                <div id="state-connected-nudge" class="api-state hidden">
+                    <div class="glass-card">
+                        <h3>Nudge API Status</h3>
+                        <div class="status-display"><span>Connected as:</span><strong id="connected-email-display"></strong></div>
+                        <div class="usage-display">
+                            <label>Monthly Usage</label>
+                            <div class="progress-bar-wrapper"><div id="usage-bar-fill" class="progress-bar-fill"></div></div>
+                            <span id="usage-text"></span>
+                        </div>
+                        <button id="disconnect-nudge-btn" class="btn btn-danger">Disconnect</button>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Pexels key form - shown by default unless connected -->
-            <div id="pexels-form-view">
-                <p>For unlimited backgrounds and maximum privacy, get a free key from Pexels.com and paste it here.</p>
-                <p id="switch-notice" class="hidden">
-                    <small><i>Note: Switching to this option will disable your Nudge API key connection.</i></small>
-                </p>
-                <form id="byok-form">
-                    <input type="text" id="pexels-key-input" placeholder="Paste your Pexels API Key" required>
-                    <button type="submit">Save Pexels Key</button>
-                </form>
-            </div>
-            <div id="status-message-2"></div>
-        </div>
 
-        <div class="card">
-            <h2>Distraction Management</h2>
-            <p>Add distracting websites here (one per line), for example: <em>youtube.com</em>, <em>reddit.com</em>, <em>twitter.com</em></p>
-            <form id="blacklist-form">
-                <textarea id="blacklist-textarea" rows="5"></textarea>
-                <button type="submit">Save Distraction List</button>
-            </form>
-            <div id="status-message-3"></div>
-        </div>
+                <div id="state-connected-pexels" class="api-state hidden">
+                    <div class="glass-card">
+                        <h3>Pexels API Status</h3>
+                        <div class="status-display"><span>Your Personal Key:</span><strong id="masked-pexels-key-display"></strong></div>
+                        <button id="disconnect-pexels-btn" class="btn btn-danger">Disconnect</button>
+                    </div>
+                </div>
+
+                <div id="state-disconnected" class="api-state hidden">
+                    <div class="glass-card">
+                        <p class="card-subtitle">For loading background images, please select and configure one of the options below.</p>
+                        
+                        <div class="api-option">
+                            <div class="option-header">
+                                <h3>Nudge API Key</h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="nudge-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <p class="option-description">Get a free, rate-limited (16/month) API key from us.</p>
+                            <div class="collapsible-content">
+                                <div class="card">
+                                    <form id="register-form">
+                                        <input type="email" id="email-input" placeholder="you@example.com" required>
+                                        <button type="submit" class="btn">Get Verification Code</button>
+                                    </form>
+                                    <form id="verify-form" class="hidden">
+                                        <input type="text" id="otp-input" placeholder="Enter 6-digit code" required>
+                                        <button type="submit" class="btn">Verify & Save Key</button>
+                                    </form>
+                                    <div id="status-message-1" class="status-message"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="api-option">
+                            <div class="option-header">
+                                <h3>Use Your Own Pexels Key</h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="pexels-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <p class="option-description">For unlimited backgrounds and maximum privacy.</p>
+                            <div class="collapsible-content">
+                                <div class="card">
+                                    <form id="byok-form">
+                                        <input type="text" id="pexels-key-input" placeholder="Paste your Pexels API Key" required>
+                                        <button type="submit" class="btn">Save Pexels Key</button>
+                                    </form>
+                                    <div id="status-message-2" class="status-message"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="distractions" class="content-section">
+                <div class="content-header">
+                    <h2>Distraction Management</h2>
+                    <p>Add sites you want Nudge to intercept. They will be added to your blacklist.</p>
+                </div>
+                <div class="glass-card">
+                    <h3>Blocked Domains</h3>
+                    <div class="table-wrapper">
+                        <table class="distraction-table">
+                            <thead><tr><th>Domain</th><th>Actions</th></tr></thead>
+                            <tbody id="blacklist-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                    <form id="blacklist-form" class="add-form">
+                        <input type="text" id="blacklist-input" placeholder="e.g., instagram.com">
+                        <button type="submit" class="btn">Add</button>
+                    </form>
+                    <div id="status-message-3" class="status-message"></div>
+                </div>
+            </section>
+
+            <section id="about" class="content-section">
+                <div class="content-header">
+                    <h2>About Nudge</h2>
+                    <p>Your intelligent sidekick against procrastination.</p>
+                </div>
+                <div class="glass-card">
+                    <p><strong>Version:</strong> <span id="about-version">0.9.8</span></p>
+                    <p><strong>Created by:</strong> <a href="https://shakibbinkabir.me" target="_blank">Shakib Bin Kabir</a></p>
+                    <div class="button-group">
+                        <a href="link-to-changelog" target="_blank" class="btn btn-secondary">View Changelog</a>
+                        <a href="mailto:contact@shakibbinkabir.me" class="btn btn-secondary">Submit Feedback</a>
+                        <a href="https://github.com/shakibbinkabir/nudge" target="_blank" class="btn btn-secondary">Contribute on GitHub</a>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
     <script src="options.js"></script>
 </body>

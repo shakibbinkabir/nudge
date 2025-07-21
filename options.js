@@ -1,5 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Get DOM Elements
+    // =================================================================
+    //  ELEMENT REFERENCES
+    // =================================================================
+    const navLinks = document.querySelectorAll('.sidebar-nav-item');
+    const contentSections = document.querySelectorAll('.content-section');
+    const apiStates = {
+        nudge: document.getElementById('state-connected-nudge'),
+        pexels: document.getElementById('state-connected-pexels'),
+        disconnected: document.getElementById('state-disconnected')
+    };
+
+    // Form Elements
     const registerForm = document.getElementById('register-form');
     const verifyForm = document.getElementById('verify-form');
     const byokForm = document.getElementById('byok-form');
@@ -9,64 +20,86 @@ document.addEventListener('DOMContentLoaded', () => {
     const status1 = document.getElementById('status-message-1');
     const status2 = document.getElementById('status-message-2');
     
-    // Connected email view elements
-    const connectedEmailView = document.getElementById('connected-email-view');
-    const registrationView = document.getElementById('registration-view');
-    const connectedEmailDisplay = document.getElementById('connected-email-display');
-    const removeEmailBtn = document.getElementById('remove-email-btn');
-    const changeEmailBtn = document.getElementById('change-email-btn');
-    
-    // Connected Pexels view elements
-    const connectedPexelsView = document.getElementById('connected-pexels-view');
-    const pexelsFormView = document.getElementById('pexels-form-view');
-    const removePexelsBtn = document.getElementById('remove-pexels-btn');
-    const changePexelsBtn = document.getElementById('change-pexels-btn');
-    
-    // Get the switch notice element
-    const switchNotice = document.getElementById('switch-notice');
-    
-    // Check if user already has a Nudge API key or Pexels key
-    const checkExistingConnection = () => {
-        chrome.storage.local.get(['nudgeApiKey', 'connectedEmail', 'userPexelsKey'], (result) => {
-            // Check Nudge API connection
+    const disconnectNudgeBtn = document.getElementById('disconnect-nudge-btn');
+    const disconnectPexelsBtn = document.getElementById('disconnect-pexels-btn');
+
+    // =================================================================
+    //  STATE MANAGEMENT & INITIALIZATION
+    // =================================================================
+    const initializeApiState = () => {
+        Object.values(apiStates).forEach(state => state.classList.add('hidden'));
+        chrome.storage.local.get(['nudgeApiKey', 'userPexelsKey', 'connectedEmail', 'nudgeApiUsage'], (result) => {
+            console.log("Current storage state:", result); // Debug log
             if (result.nudgeApiKey && result.connectedEmail) {
-                // User is connected with email, show connected view
-                connectedEmailDisplay.textContent = result.connectedEmail;
-                connectedEmailView.classList.remove('hidden');
-                registrationView.classList.add('hidden');
+                apiStates.nudge.classList.remove('hidden');
+                document.getElementById('connected-email-display').textContent = result.connectedEmail;
+                const usage = result.nudgeApiUsage || { count: 0 };
+                const usagePercent = Math.min((usage.count / 16) * 100, 100);
+                document.getElementById('usage-bar-fill').style.width = `${usagePercent}%`;
+                document.getElementById('usage-text').textContent = `Requests this month: ${usage.count} / 16`;
+            } else if (result.userPexelsKey) {
+                apiStates.pexels.classList.remove('hidden');
+                const maskedKey = `••••••••••••${result.userPexelsKey.slice(-4)}`;
+                document.getElementById('masked-pexels-key-display').textContent = maskedKey;
                 
-                // Also show the switch notice in the BYOK section
-                switchNotice.classList.remove('hidden');
+                // If we have rate limit information, display it
+                if (result.pexelsRateLimit && result.pexelsRateRemaining) {
+                    const usageElement = document.createElement('div');
+                    usageElement.className = 'status-display';
+                    usageElement.innerHTML = `<span>API Requests:</span><strong>${result.pexelsRateRemaining} / ${result.pexelsRateLimit} remaining</strong>`;
+                    
+                    // Insert after the key display
+                    const keyDisplay = document.getElementById('masked-pexels-key-display').closest('.status-display');
+                    keyDisplay.parentNode.insertBefore(usageElement, keyDisplay.nextSibling);
+                }
             } else {
-                // User is not connected with Nudge API, show registration view
-                connectedEmailView.classList.add('hidden');
-                registrationView.classList.remove('hidden');
-                
-                // Hide the switch notice in the BYOK section
-                switchNotice.classList.add('hidden');
-            }
-            
-            // Check Pexels key connection
-            if (result.userPexelsKey) {
-                // User has a Pexels key, show connected view
-                connectedPexelsView.classList.remove('hidden');
-                pexelsFormView.classList.add('hidden');
-            } else {
-                // User doesn't have a Pexels key, show form view
-                connectedPexelsView.classList.add('hidden');
-                pexelsFormView.classList.remove('hidden');
+                apiStates.disconnected.classList.remove('hidden');
             }
         });
     };
-    
-    // Run check on page load
-    checkExistingConnection();
+    initializeApiState();
 
-    // Handle Option 1: Email Registration
+    // =================================================================
+    //  NAVIGATION LOGIC
+    // =================================================================
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.dataset.target;
+            navLinks.forEach(navLink => navLink.classList.remove('active'));
+            link.classList.add('active');
+            contentSections.forEach(section => {
+                section.id === targetId ? section.classList.add('active') : section.classList.remove('active');
+            });
+        });
+    });
+    
+    // =================================================================
+    //  DISCONNECT LOGIC
+    // =================================================================
+    disconnectNudgeBtn.addEventListener('click', () => {
+        chrome.storage.local.remove(['nudgeApiKey', 'connectedEmail', 'nudgeApiUsage'], () => {
+            console.log('Nudge API key disconnected.');
+            initializeApiState(); // Refresh the view
+        });
+    });
+
+    disconnectPexelsBtn.addEventListener('click', () => {
+        chrome.storage.local.remove(['userPexelsKey', 'pexelsRateLimit', 'pexelsRateRemaining'], () => {
+            console.log('Pexels API key disconnected.');
+            initializeApiState(); // Refresh the view
+        });
+    });
+
+    // =================================================================
+    //  API FORM SUBMISSION LOGIC
+    // =================================================================
+
+    // --- Nudge API: Step 1 - Register Email & Get OTP ---
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         status1.textContent = 'Sending code...';
-        status1.className = '';
+        status1.className = 'status-message';
 
         try {
             const response = await fetch('https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/register.php', {
@@ -75,22 +108,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email: emailInput.value })
             });
             const result = await response.json();
-            if (!response.ok) throw new Error(result.error);
+            if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
             
             status1.textContent = 'Verification code sent to your email!';
-            status1.className = 'success';
+            status1.classList.add('success');
             verifyForm.classList.remove('hidden');
+            registerForm.style.display = 'none'; // Hide the register form
+            otpInput.focus(); // Focus on the OTP input field
         } catch (error) {
             status1.textContent = error.message;
-            status1.className = 'error';
+            status1.classList.add('error');
         }
     });
 
-    // Handle Option 1: OTP Verification
+    // --- Nudge API: Step 2 - Verify OTP & Save Key ---
     verifyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        status1.textContent = 'Verifying...';
-        
+        status1.textContent = 'Verifying code...';
+        status1.className = 'status-message';
+
         try {
             const response = await fetch('https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/verify.php', {
                 method: 'POST',
@@ -98,189 +134,200 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email: emailInput.value, otp: otpInput.value })
             });
             const result = await response.json();
-            if (!response.ok) throw new Error(result.error);
+            if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
 
-            // Check if user already had a Pexels key
-            chrome.storage.local.get(['userPexelsKey'], (existingData) => {
-                const hadPexelsKey = existingData.userPexelsKey;
-                
-                // Save the Nudge API key, email, and clear the Pexels key
+            // Save the new Nudge key and remove all Pexels key data
+            chrome.storage.local.remove(['userPexelsKey', 'pexelsRateLimit', 'pexelsRateRemaining'], () => {
                 chrome.storage.local.set({ 
                     nudgeApiKey: result.api_key,
                     connectedEmail: emailInput.value,
-                    userPexelsKey: null,
-                    // Clear cached background to force new fetch with new API key
-                    backgroundImageData: null,
-                    backgroundImageBlob: null,
-                    lastFetchTimestamp: null
+                    nudgeApiUsage: { count: 0 } // Initialize usage counter
                 }, () => {
-                    if (hadPexelsKey) {
-                        status1.textContent = 'Success! Your Nudge API key is saved. Your Pexels key has been removed.';
-                    } else {
-                        status1.textContent = 'Success! Your Nudge API key is saved.';
-                    }
-                    status1.className = 'success';
-                    // Update the UI to show connected view
-                    checkExistingConnection();
+                    console.log("Nudge API key saved successfully");
+                    status1.textContent = 'Verification successful!';
+                    status1.classList.add('success');
+                    setTimeout(() => {
+                        initializeApiState(); // Refresh the UI to show the connected state
+                    }, 1000);
                 });
             });
         } catch (error) {
             status1.textContent = error.message;
-            status1.className = 'error';
+            status1.classList.add('error');
         }
     });
 
-    // Handle Option 2: Bring Your Own Key
+    // --- Bring Your Own Key (BYOK) Logic ---
     byokForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const pexelsKey = pexelsKeyInput.value.trim();
-        if (pexelsKey) {
-            status2.textContent = 'Validating your Pexels API key...';
-            status2.className = '';
+        status2.textContent = 'Validating key...';
+        status2.className = 'status-message';
+
+        if (!pexelsKey) {
+            status2.textContent = 'Please enter a valid Pexels API key.';
+            status2.classList.add('error');
+            return;
+        }
+        
+        try {
+            // Validate the key by making a simple request to the Pexels API
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
             
-            // First validate if the key works with the Pexels API
-            try {
-                // Use search endpoint with specific parameters for testing
-                // Create an AbortController with timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
-                
-                const response = await fetch('https://api.pexels.com/v1/search?query=nature&per_page=1', {
-                    headers: { 'Authorization': pexelsKey },
-                    signal: controller.signal
+            const response = await fetch('https://api.pexels.com/v1/search?query=nature&per_page=1', {
+                method: 'GET',
+                headers: {
+                    'Authorization': pexelsKey
+                },
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            // Check if we received valid rate limit headers - real Pexels API keys will have these
+            const rateLimit = response.headers.get('X-Ratelimit-Limit');
+            const rateRemaining = response.headers.get('X-Ratelimit-Remaining');
+            
+            if (!rateLimit || !rateRemaining) {
+                console.error('Missing rate limit headers - likely invalid API key');
+                throw new Error('Invalid API key format. Pexels API keys should start with "Bearer" or a valid key format.');
+            }
+            
+            if (!response.ok) {
+                throw new Error(`API request failed with status: ${response.status}`);
+            }
+            
+            // Parse the response to verify it has the expected structure
+            const data = await response.json();
+            
+            // Do more thorough validation of the response structure
+            if (!data.photos || !Array.isArray(data.photos)) {
+                throw new Error('Invalid API response structure');
+            }
+            
+            // Verify at least one photo has the expected photo structure with src attributes
+            if (data.photos.length === 0 || !data.photos[0].src || !data.photos[0].src.original) {
+                throw new Error('Invalid photo data structure returned from API');
+            }
+            
+            // Remove all Nudge API key data first, then save the new Pexels key
+            // Make sure all storage keys are properly cleared before setting new values
+        chrome.storage.local.remove(['nudgeApiKey', 'connectedEmail', 'nudgeApiUsage'], () => {
+            // Ensure we're setting a completely fresh state
+            chrome.storage.local.set({ 
+                userPexelsKey: pexelsKey,
+                pexelsRateLimit: rateLimit || '20000',
+                pexelsRateRemaining: rateRemaining || '20000'
+            }, () => {
+                    console.log("Pexels API key saved successfully");
+                    status2.textContent = `Key validated successfully! Monthly limit: ${rateLimit || '20000'}`;
+                    status2.classList.add('success');
+                    setTimeout(() => {
+                        initializeApiState(); // Refresh the UI to show the connected state
+                    }, 1500);
                 });
-                
-                clearTimeout(timeoutId); // Clear the timeout if request completes
-                
-                if (!response.ok) {
-                    throw new Error(`Invalid API key or API error (Status: ${response.status})`);
-                }
-                
-                // Try to parse the response to ensure it's valid
-                const data = await response.json();
-                if (!data || !data.photos) {
-                    throw new Error('Unexpected response format from Pexels API');
-                }
-                
-                // Ensure we have at least one photo to verify the structure
-                if (data.photos.length === 0) {
-                    throw new Error('No photos returned from Pexels API');
-                }
-                
-                console.log("Pexels API key validation successful");
-                
-                // Additional check to verify photo structure
-                const testPhoto = data.photos[0];
-                if (!testPhoto.src || !testPhoto.src.large) {
-                    throw new Error('Invalid photo structure in Pexels response');
-                }
-                
-                // Key works, save it
-                chrome.storage.local.get(['nudgeApiKey', 'connectedEmail'], (existingData) => {
-                    const hadNudgeConnection = existingData.nudgeApiKey && existingData.connectedEmail;
-                    
-                    // Save the Pexels key and clear Nudge API key
-                    chrome.storage.local.set({ 
-                        userPexelsKey: pexelsKey,
-                        nudgeApiKey: null,
-                        connectedEmail: null,  // Also clear the connected email
-                        // Clear cached background to force new fetch with new API key
-                        backgroundImageData: null,
-                        backgroundImageBlob: null,
-                        lastFetchTimestamp: null
-                    }, () => {
-                        if (hadNudgeConnection) {
-                            status2.textContent = 'Success! Your Pexels key is verified and saved. Your Nudge API connection has been removed.';
-                        } else {
-                            status2.textContent = 'Success! Your Pexels key is verified and saved.';
-                        }
-                        status2.className = 'success';
-                        
-                        // Update the UI to show connected view for Pexels
-                        checkExistingConnection();
-                    });
-                });
-            } catch (error) {
-                console.error('Pexels API key validation error:', error);
-                status2.textContent = `Error: ${error.message}. Please check your key and try again.`;
-                status2.className = 'error';
+            });
+        } catch (error) {
+            status2.textContent = 'Invalid API key. Please check and try again.';
+            status2.classList.add('error');
+            console.error('Pexels API validation error:', error);
+            
+            // Clear any previously stored key on validation failure
+            chrome.storage.local.remove(['userPexelsKey', 'pexelsRateLimit', 'pexelsRateRemaining']);
+        }
+    });
+    
+    // =================================================================
+    //  API OPTION TOGGLE LOGIC
+    // =================================================================
+    const nudgeToggle = document.getElementById('nudge-toggle');
+    const pexelsToggle = document.getElementById('pexels-toggle');
+    
+    // Ensure we have references to both checkboxes and their containers
+    if (!nudgeToggle || !pexelsToggle) {
+        console.error('Could not find toggle switches!');
+        return;
+    }
+    
+    const nudgeContainer = nudgeToggle.closest('.api-option');
+    const pexelsContainer = pexelsToggle.closest('.api-option');
+    
+    if (!nudgeContainer || !pexelsContainer) {
+        console.error('Could not find api-option containers!');
+        return;
+    }
+    
+    const nudgeContent = nudgeContainer.querySelector('.collapsible-content');
+    const pexelsContent = pexelsContainer.querySelector('.collapsible-content');
+    
+    if (!nudgeContent || !pexelsContent) {
+        console.error('Could not find collapsible content elements!');
+        return;
+    }
+
+    // Function to update collapsible content visibility
+    const updateCollapsibleVisibility = () => {
+        console.log('Toggle state:', { nudge: nudgeToggle.checked, pexels: pexelsToggle.checked });
+        
+        // Mutual exclusivity - if one is checked, uncheck the other
+        if (nudgeToggle.checked && pexelsToggle.checked) {
+            // This shouldn't happen with mutual exclusivity, but just in case
+            if (e && e.target === nudgeToggle) {
+                pexelsToggle.checked = false;
+            } else {
+                nudgeToggle.checked = false;
             }
         }
-    });
-    
-    // Handle Remove Email Connection button
-    removeEmailBtn.addEventListener('click', () => {
-        chrome.storage.local.set({
-            nudgeApiKey: null,
-            connectedEmail: null
-        }, () => {
-            // Switch to registration view
-            checkExistingConnection();
-            status1.textContent = 'Connection removed successfully.';
-            status1.className = 'success';
-        });
-    });
-    
-    // Handle Change Email button
-    changeEmailBtn.addEventListener('click', () => {
-        // Just switch to registration view without removing the key yet
-        // (it will be replaced when they verify a new email)
-        connectedEmailView.classList.add('hidden');
-        registrationView.classList.remove('hidden');
-        emailInput.focus();
-        status1.textContent = 'Enter your new email address.';
-        status1.className = '';
-    });
-    
-    // Handle Remove Pexels Key button
-    removePexelsBtn.addEventListener('click', () => {
-        chrome.storage.local.set({
-            userPexelsKey: null
-        }, () => {
-            // Switch to form view
-            checkExistingConnection();
-            status2.textContent = 'Pexels API key removed successfully.';
-            status2.className = 'success';
-        });
-    });
-    
-    // Handle Change Pexels Key button
-    changePexelsBtn.addEventListener('click', () => {
-        // Just switch to form view without removing the key yet
-        // (it will be replaced when they submit the form)
-        connectedPexelsView.classList.add('hidden');
-        pexelsFormView.classList.remove('hidden');
-        pexelsKeyInput.focus();
-        status2.textContent = 'Enter your new Pexels API key.';
-        status2.className = '';
-    });
         
-    // Blacklist management
-    const blacklistForm = document.getElementById('blacklist-form');
-    const blacklistTextarea = document.getElementById('blacklist-textarea');
-    const status3 = document.getElementById('status-message-3');
+        // Always update both sections based on their current checked state
+        nudgeContent.style.maxHeight = nudgeToggle.checked ? '500px' : '0';
+        nudgeContent.style.opacity = nudgeToggle.checked ? '1' : '0';
+        nudgeContent.style.marginTop = nudgeToggle.checked ? '1.5rem' : '0';
+        
+        pexelsContent.style.maxHeight = pexelsToggle.checked ? '500px' : '0';
+        pexelsContent.style.opacity = pexelsToggle.checked ? '1' : '0';
+        pexelsContent.style.marginTop = pexelsToggle.checked ? '1.5rem' : '0';
+    };
 
-    // Load existing blacklist on page load
-    chrome.storage.local.get(['blacklist'], (result) => {
-        if (result.blacklist) {
-            blacklistTextarea.value = result.blacklist.join('\n');
+    // Initialize the collapsible state
+    updateCollapsibleVisibility();
+
+    // Add event listeners to checkboxes
+    nudgeToggle.addEventListener('change', (e) => {
+        if (nudgeToggle.checked) {
+            pexelsToggle.checked = false;
         }
+        updateCollapsibleVisibility();
+    });
+    
+    pexelsToggle.addEventListener('change', (e) => {
+        if (pexelsToggle.checked) {
+            nudgeToggle.checked = false;
+        }
+        updateCollapsibleVisibility();
     });
 
-    // Save the blacklist
-    blacklistForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const urls = blacklistTextarea.value.split('\n').map(url => url.trim()).filter(url => url);
-        console.log('Saving blacklist:', urls);
-        chrome.storage.local.set({ blacklist: urls }, () => {
-            status3.textContent = 'Distraction list saved!';
-            status3.className = 'success';
-            setTimeout(() => { status3.textContent = ''; }, 2000);
-            
-            // Verify storage
-            chrome.storage.local.get(['blacklist'], (result) => {
-                console.log('Verified blacklist in storage:', result.blacklist);
-            });
+    // Also add a click listener to the header to toggle the checkbox
+    document.querySelectorAll('.option-header').forEach(header => {
+        header.addEventListener('click', (e) => {
+            // Prevent clicks on the label/switch itself from firing twice
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SPAN') {
+                const checkbox = header.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+                
+                // If this checkbox was just checked, uncheck the other one
+                if (checkbox.checked) {
+                    if (checkbox === nudgeToggle) {
+                        pexelsToggle.checked = false;
+                    } else if (checkbox === pexelsToggle) {
+                        nudgeToggle.checked = false;
+                    }
+                }
+                
+                // Trigger the update
+                updateCollapsibleVisibility();
+            }
         });
     });
 });
