@@ -488,30 +488,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 4. Set up changelog modal
                 changelogPrompt.addEventListener('click', (e) => {
                     e.preventDefault();
+                    // 1. Create a new Showdown converter instance
+                    const converter = new showdown.Converter();
                     
-                    try {
-                        // A more robust markdown to HTML converter
-                        const releaseNotesHtml = data.body
-                            .replace(/\r\n/g, '\n')
-                            .replace(/\n\n/g, '<br><br>')
-                            .replace(/### (.*?)(\n|$)/g, '<h3>$1</h3>$2')
-                            .replace(/## (.*?)(\n|$)/g, '<h2>$1</h2>$2')
-                            .replace(/# (.*?)(\n|$)/g, '<h1>$1</h1>$2')
-                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                            .replace(/\n- (.*?)(?=\n|$)/g, '\n<li>$1</li>')
-                            .replace(/\n\* (.*?)(?=\n|$)/g, '\n<li>$1</li>')
-                            .replace(/`(.*?)`/g, '<code>$1</code>')
-                            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-                            .replace(/\n(?!<)/g, '<br>');
-                        
-                        changelogBody.innerHTML = releaseNotesHtml;
-                        changelogModal.classList.remove('hidden');
-                    } catch (error) {
-                        console.error('Error processing changelog:', error);
-                        changelogBody.innerHTML = '<p>Error displaying changelog content.</p>';
-                        changelogModal.classList.remove('hidden');
-                    }
+                    // 2. Set options for GitHub Flavored Markdown (for tables, strikethrough, etc.)
+                    converter.setFlavor('github');
+                    
+                    // 3. Convert the markdown from the API response and set the HTML
+                    changelogBody.innerHTML = converter.makeHtml(data.body);
+                    
+                    changelogModal.classList.remove('hidden');
                 });
             })
             .catch(error => {
