@@ -136,7 +136,10 @@
                         </table>
                     </div>
                     <form id="blacklist-form" class="add-form">
-                        <input type="text" id="blacklist-input" placeholder="e.g., instagram.com">
+                        <div class="input-with-favicon">
+                            <img id="favicon-preview" src="" alt="" class="favicon hidden"/>
+                            <input type="text" style="width: 99%;" id="blacklist-input" placeholder="e.g., instagram.com">
+                        </div>
                         <button type="submit" class="btn" style="padding: 0.8rem 2rem;">Add</button>
                     </form>
                     <div id="status-message-3" class="status-message"></div>

@@ -311,3 +311,24 @@ input:checked ~ .collapsible-content {
     height: 16px;
     vertical-align: middle;
 }
+
+/* Input with Favicon Preview */
+.input-with-favicon {
+    position: relative;
+    flex-grow: 1;
+}
+
+#blacklist-input {
+    padding-left: 2.5rem; /* Make space for favicon */
+}
+
+#favicon-preview {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#favicon-preview.hidden {
+    display: none;
+}

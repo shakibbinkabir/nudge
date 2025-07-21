@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.values(apiStates).forEach(state => state.classList.add('hidden'));
         
         chrome.storage.local.get(['nudgeApiKey', 'userPexelsKey', 'connectedEmail', 'nudgeApiUsage'], (result) => {
-            console.log("Current storage state:", result); // Debug log
             
             if (result.nudgeApiKey && result.connectedEmail) {
                 // User has Nudge API key
@@ -352,6 +351,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper function to get favicon URL
     const getFaviconUrl = (domain) => `https://www.google.com/s2/favicons?sz=64&domain_url=${domain}`;
 
+    // Debounce helper function
+    const debounce = (func, delay) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    };
+
     const renderBlacklist = () => {
         blacklistTableBody.innerHTML = '';
         if (blacklist.length === 0) {
@@ -405,6 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
             blacklist.push({ domain: newDomain, active: true });
             saveBlacklist();
             blacklistInput.value = '';
+            document.getElementById('favicon-preview').classList.add('hidden'); // Hide favicon preview
         }
     });
 
@@ -423,6 +432,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             saveBlacklist();
         }
+    });
+
+    // Favicon preview functionality
+    const updateFaviconPreview = debounce((domain) => {
+        const faviconPreview = document.getElementById('favicon-preview');
+        if (domain && domain.includes('.')) {
+            faviconPreview.src = getFaviconUrl(domain);
+            faviconPreview.classList.remove('hidden');
+        } else {
+            faviconPreview.classList.add('hidden');
+        }
+    }, 500);
+
+    blacklistInput.addEventListener('input', (e) => {
+        updateFaviconPreview(e.target.value.trim());
     });
 
     // Replace the previous initializeBlacklist() call in your main initializeApp function
@@ -448,7 +472,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const installedVersion = manifest.version;
         installedVersionEl.textContent = `v${installedVersion}`;
         aboutInstalledVersionEl.textContent = `v${installedVersion}`;
-        console.log("Installed version:", installedVersion);
 
         // 2. Fetch latest version from GitHub
         fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`)
