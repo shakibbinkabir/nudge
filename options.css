@@ -151,3 +151,16 @@ input:checked ~ .collapsible-content {
     opacity: 1;
     margin-top: 1.5rem;
 }
+.logo{
+    width: 38px;
+    height: 38px;
+    margin-right: 0.5rem;
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
