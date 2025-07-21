@@ -2,6 +2,20 @@
 
 All notable changes to the Nudge Chrome Extension will be documented in this file.
 
+## [0.9.8] - 2025-07-22
+
+### Added
+- Displayed favicons next to each domain in the Distractions list for better visual identification.
+- Implemented a real-time favicon preview in the 'Add Domain' input field that appears as you type.
+- Created an automatic migration process to update the old blacklist data structure to the new format.
+
+### Changed
+- Overhauled the Distractions page actions, replacing the single 'Remove' button with a more flexible **Block/Unblock** toggle and a separate **Delete** button.
+- Upgraded the blacklist's underlying data structure to support toggling domains on or off.
+
+### Fixed
+- Implemented robust validation for user-provided Pexels API keys to verify the key with Pexels *before* saving it, preventing invalid keys.
+
 ## [0.9.7] - 2025-07-22
 
 ### Changed
