@@ -206,61 +206,37 @@ document.addEventListener('DOMContentLoaded', () => {
             status2.classList.add('error');
             return;
         }
-       
+
         try {
-            // Validate the key by making a simple request to the Pexels API
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-           
-            const response = await fetch('https://api.pexels.com/v1/search?query=nature&per_page=1', {
-                method: 'GET',
+            // Step 1: Make a test request to Pexels to validate the key
+            const response = await fetch('https://api.pexels.com/v1/curated?per_page=1', {
                 headers: {
                     'Authorization': pexelsKey
-                },
-                signal: controller.signal
+                }
             });
-           
-            clearTimeout(timeoutId);
-           
-            // Check if we received valid rate limit headers - real Pexels API keys will have these
-            const rateLimit = response.headers.get('X-Ratelimit-Limit');
-            const rateRemaining = response.headers.get('X-Ratelimit-Remaining');
-           
+
             if (!response.ok) {
-                throw new Error(`API request failed with status: ${response.status}`);
+                // If response is not 200 OK (e.g., 401 Unauthorized), the key is invalid
+                throw new Error(`Invalid API Key. Please check the key and try again. (Status: ${response.status})`);
             }
-           
-            // Parse the response to verify it has the expected structure
-            const data = await response.json();
-           
-            // Do more thorough validation of the response structure
-            if (!data.photos || !Array.isArray(data.photos)) {
-                throw new Error('Invalid API response structure');
-            }
-           
-            // Remove all Nudge API key data first, then save the new Pexels key
-            chrome.storage.local.remove(['nudgeApiKey', 'connectedEmail', 'nudgeApiUsage', 'backgroundImageData', 'backgroundImageBlob', 'lastFetchTimestamp'], () => {
-                // Ensure we're setting a completely fresh state
-                chrome.storage.local.set({
-                    userPexelsKey: pexelsKey,
-                    pexelsRateLimit: rateLimit || '20000',
-                    pexelsRateRemaining: rateRemaining || '20000'
-                }, () => {
-                    console.log("Pexels API key saved successfully");
-                    status2.textContent = `Key validated successfully! Monthly limit: ${rateLimit || '20000'}`;
-                    status2.classList.add('success');
-                    setTimeout(() => {
-                        initializeApiState(); // Refresh the UI to show the connected state
-                    }, 1500);
-                });
+
+            // Step 2: If validation is successful, save the key
+            chrome.storage.local.set({ 
+                userPexelsKey: pexelsKey,
+                nudgeApiKey: null, // Clear the other key type to ensure exclusivity
+                connectedEmail: null
+            }, () => {
+                status2.textContent = 'Success! Your Pexels key is verified and saved.';
+                status2.className = 'status-message success';
+                // Refresh the UI to show the "Connected" state
+                setTimeout(initializeApiState, 1000); 
             });
+
         } catch (error) {
-            status2.textContent = 'Invalid API key. Please check and try again.';
-            status2.classList.add('error');
+            // Step 3: If validation fails, show an error message
+            status2.textContent = error.message;
+            status2.className = 'status-message error';
             console.error('Pexels API validation error:', error);
-           
-            // Clear any previously stored key on validation failure
-            chrome.storage.local.remove(['userPexelsKey', 'pexelsRateLimit', 'pexelsRateRemaining']);
         }
     });
    
