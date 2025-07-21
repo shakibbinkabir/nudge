@@ -349,10 +349,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     let blacklist = []; // Will be an array of objects: { domain: '..', active: true }
 
+    // Helper function to get favicon URL
+    const getFaviconUrl = (domain) => `https://www.google.com/s2/favicons?sz=64&domain_url=${domain}`;
+
     const renderBlacklist = () => {
         blacklistTableBody.innerHTML = '';
         if (blacklist.length === 0) {
-            blacklistTableBody.innerHTML = '<tr><td colspan="2" class="empty-table-cell">Your distraction list is empty.</td></tr>';
+            blacklistTableBody.innerHTML = '<tr><td colspan="3" class="empty-table-cell">Your distraction list is empty.</td></tr>';
         } else {
             blacklist.forEach(item => {
                 const row = document.createElement('tr');
@@ -360,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const unblockBtnDisabled = !item.active ? 'disabled' : '';
                 
                 row.innerHTML = `
+                    <td><img src="${getFaviconUrl(item.domain)}" class="favicon" alt=""></td>
                     <td>${item.domain}</td>
                     <td class="action-cell">
                         <button class="btn btn-secondary btn-sm toggle-block-btn" data-domain="${item.domain}" ${blockBtnDisabled}>Block</button>
