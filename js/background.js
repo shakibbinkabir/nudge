@@ -73,7 +73,7 @@ chrome.runtime.onInstalled.addListener((details) => {
             console.log('No existing blacklist found, initializing empty array');
             updates.blacklist = [];
         } else {
-            console.log('Existing blacklist found:', result.blacklist);
+            // console.log('Existing blacklist found:', result.blacklist);
         }
         
         // Initialize snoozes if needed
@@ -90,7 +90,7 @@ chrome.runtime.onInstalled.addListener((details) => {
         
         // Initialize user profile if needed
         if (!result.userProfile) {
-            console.log('No existing user profile found, will be initialized when the user first visits the new tab page');
+            // console.log('No existing user profile found, will be initialized when the user first visits the new tab page');
         }
         
         // Only save if we have updates to make
@@ -161,7 +161,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                             if (allTasksCompleted || noTasks) {
                                 return; // Allow navigation to continue
                             }
-                            const interventionUrl = chrome.runtime.getURL("intervention.html") + "?originalUrl=" + encodeURIComponent(url);
+                            const interventionUrl = chrome.runtime.getURL("../pages/intervention.html") + "?originalUrl=" + encodeURIComponent(url);
                             chrome.tabs.update(tabId, { url: interventionUrl });
                         });
                     }

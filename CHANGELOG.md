@@ -2,6 +2,14 @@
 
 All notable changes to the Nudge Chrome Extension will be documented in this file.
 
+## [0.9.9] - 2025-07-22
+
+### Changed
+- **Project Restructuring:** Refactored the entire project directory structure for better organization, scalability, and maintainability in preparation for the v1.0 launch.
+- Moved all HTML, CSS, JavaScript, and asset files into dedicated folders (`/pages`, `/css`, `/js`, `/assets`).
+- Updated `manifest.json` and all internal file path references to support the new structure.
+- Renamed `script.js` to `newtab.js` for improved clarity.
+
 ## [0.9.8] - 2025-07-22
 
 ### Added
