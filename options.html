@@ -46,7 +46,7 @@
                 <div id="state-connected-nudge" class="api-state hidden">
                     <div class="glass-card">
                         <h3>Nudge API Status</h3>
-                        <div class="status-display"><span>Connected as:</span><strong id="connected-email-display"></strong></div>
+                        <div class="status-display"><span style="margin-right: 0.5rem;">Connected as:</span><strong id="connected-email-display"></strong></div>
                         <!-- <div class="usage-display">
                             <label>Monthly Usage</label>
                             <div class="progress-bar-wrapper"><div id="usage-bar-fill" class="progress-bar-fill"></div></div>
@@ -124,14 +124,14 @@
                     <h3>Blocked Domains</h3>
                     <div class="table-wrapper">
                         <table class="distraction-table">
-                            <thead><tr><th>Domain</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Domain</th><th style="text-align: right;padding: 0 2.2rem 0 0;">Actions</th></tr></thead>
                             <tbody id="blacklist-table-body">
                                 </tbody>
                         </table>
                     </div>
                     <form id="blacklist-form" class="add-form">
                         <input type="text" id="blacklist-input" placeholder="e.g., instagram.com">
-                        <button type="submit" class="btn">Add</button>
+                        <button type="submit" class="btn" style="padding: 0.8rem 2rem;">Add</button>
                     </form>
                     <div id="status-message-3" class="status-message"></div>
                 </div>
@@ -142,13 +142,52 @@
                     <h2>About Nudge</h2>
                     <p>Your intelligent sidekick against procrastination.</p>
                 </div>
+
+                <!-- Version Check Module -->
                 <div class="glass-card">
-                    <p><strong>Version:</strong> <span id="about-version">0.9.8</span></p>
-                    <p><strong>Created by:</strong> <a href="https://shakibbinkabir.me" target="_blank">Shakib Bin Kabir</a></p>
-                    <div class="button-group">
-                        <a href="https://github.com/shakibbinkabir/nudge/blob/main/CHANGELOG.md" target="_blank" class="btn btn-secondary">View Changelog</a>
-                        <a href="mailto:contact@shakibbinkabir.me" class="btn btn-secondary">Submit Feedback</a>
-                        <a href="https://github.com/shakibbinkabir/nudge" target="_blank" class="btn btn-secondary">Contribute on GitHub</a>
+                    <h3>Version Status</h3>
+                    <div id="version-checker" class="version-checker">
+                        <div class="version-info">
+                            <span class="version-label">Installed Version</span>
+                            <strong id="installed-version">v0.0.0</strong>
+                        </div>
+                        <div class="version-info">
+                            <span class="version-label">Latest Version</span>
+                            <strong id="latest-version">Checking...</strong>
+                        </div>
+                        <a href="#" id="update-btn" class="btn hidden" target="_blank">Update Now</a>
+                    </div>
+                    <div id="changelog-prompt" class="changelog-prompt hidden">
+                        <a href="#">Click here to see what's new</a>
+                    </div>
+                </div>
+
+                <!-- Quick Start Guide -->
+                <div class="glass-card">
+                    <h3>Quick Start Guide</h3>
+                    <ol class="quick-guide">
+                        <li>Go to the <strong>API Keys</strong> tab to connect your account.</li>
+                        <li>Visit the <strong>Distractions</strong> tab to add websites you want to block.</li>
+                        <li>Open a new tab to see your dashboard and start adding tasks!</li>
+                    </ol>
+                </div>
+
+                <!-- Footer / Branding -->
+                <div class="about-footer">
+                    <p>A product from <a class="link-hover" href="https://lab.shakibbinkabir.me" style="color: var(--text-secondary); text-decoration: none;" target="_blank"><strong>Lab by Shakib Bin Kabir</strong></a></p>
+                    <p>Developer: <a class="link-hover" href="https://shakibbinkabir.me" style="color: var(--text-secondary); text-decoration: none;" target="_blank"><strong>Shakib Bin Kabir</strong></a> | License: <a class="link-hover" href="https://github.com/shakibbinkabir/nudge?tab=MIT-1-ov-file" style="color: var(--text-secondary); text-decoration: none;" target="_blank"><strong>MIT</strong></a></p>
+                </div>
+
+                <!-- Changelog Modal (Initially Hidden) -->
+                <div id="changelog-modal" class="modal-overlay hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>What's New</h3>
+                            <button id="close-modal-btn" class="close-btn">&times;</button>
+                        </div>
+                        <div id="changelog-body" class="changelog-body">
+                            <!-- Release notes will be injected here -->
+                        </div>
                     </div>
                 </div>
             </section>

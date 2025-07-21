@@ -57,7 +57,7 @@ input:focus, textarea:focus { outline: none; border-color: var(--accent-color); 
 .status-message { margin-top: 1rem; font-weight: 500; text-align: center; height: 1.5rem; }
 .success { color: var(--success-color); }
 .error { color: var(--error-color); }
-.status-display { display: flex; justify-content: space-between; align-items: center; background: var(--input-bg); padding: 0.8rem 1.2rem; border-radius: 6px; margin: 1.5rem 0; }
+.status-display { display: flex; align-items: center; background: var(--input-bg); padding: 0.8rem 1.2rem; border-radius: 6px; margin: 1.5rem 0; }
 .status-display span { color: var(--text-secondary); }
 .progress-bar-wrapper { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; margin-top: 0.5rem; margin-bottom: 0.5rem; overflow: hidden; }
 .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-color), var(--success-color)); border-radius: 4px; transition: width 0.5s ease-out; }
@@ -156,6 +156,13 @@ input:checked ~ .collapsible-content {
     height: 38px;
     margin-right: 0.5rem;
 }
+.link-hover:hover{
+    color: var(--text-primary) !important;
+    transition: color 0.5s cubic-bezier(0.28, 0.09, 0.95, 0.78);
+}
+.hidden{
+    display: none !important;
+}
 .logo-container {
     display: flex;
     align-items: center;
@@ -164,3 +171,105 @@ input:checked ~ .collapsible-content {
     display: flex;
     flex-direction: column;
 }
+#blacklist-input{
+    padding: 0.8rem 0.8rem 0.8rem 3rem !important;
+    margin-bottom: 0 !important;
+}
+/* Version Checker */
+.version-checker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--input-bg);
+    border-radius: 8px;
+}
+.version-info {
+    display: flex;
+    flex-direction: column;
+}
+.version-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.version-info strong {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+#update-btn.up-to-date {
+    background-color: var(--success-color);
+    cursor: default;
+}
+#update-btn.up-to-date:hover {
+    transform: none;
+    box-shadow: none;
+}
+.changelog-prompt {
+    text-align: center;
+    margin-top: 1rem;
+}
+.changelog-prompt a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.changelog-prompt a:hover {
+    text-decoration: underline;
+}
+
+/* Quick Start Guide */
+.quick-guide {
+    list-style-position: inside;
+    padding-left: 0.5rem;
+}
+.quick-guide li {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+/* About Footer */
+.about-footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-content {
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+.modal-header h3 { font-size: 1.5rem; }
+.close-btn { background: none; border: none; color: var(--text-secondary); font-size: 2rem; cursor: pointer; }
+.changelog-body { max-height: 60vh; overflow-y: auto; }
+.changelog-body h1, .changelog-body h2, .changelog-body h3 { margin-top: 1rem; }
+.changelog-body ul, .changelog-body ol { padding-left: 1.5rem; }
+.changelog-body code { background: var(--input-bg); padding: 0.2rem 0.4rem; border-radius: 4px; }

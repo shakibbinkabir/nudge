@@ -444,4 +444,90 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     };
+
+    // =================================================================
+    //  ABOUT SECTION LOGIC
+    // =================================================================
+    const GITHUB_REPO = 'shakibbinkabir/nudge';
+
+    const initializeAboutSection = () => {
+        const installedVersionEl = document.getElementById('installed-version');
+        const latestVersionEl = document.getElementById('latest-version');
+        const updateBtn = document.getElementById('update-btn');
+        const changelogPrompt = document.getElementById('changelog-prompt');
+        const changelogModal = document.getElementById('changelog-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const changelogBody = document.getElementById('changelog-body');
+
+        // 1. Set installed version
+        const manifest = chrome.runtime.getManifest();
+        const installedVersion = manifest.version;
+        installedVersionEl.textContent = `v${installedVersion}`;
+
+        // 2. Fetch latest version from GitHub
+        fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`)
+            .then(response => response.json())
+            .then(data => {
+                const latestVersion = data.tag_name.replace('v', '');
+                latestVersionEl.textContent = `v${latestVersion}`;
+
+                // 3. Compare versions and update UI
+                if (latestVersion > installedVersion) {
+                    updateBtn.textContent = 'Update Now';
+                    updateBtn.href = data.html_url; // Link to the release page
+                    updateBtn.classList.remove('hidden', 'up-to-date');
+                    changelogPrompt.classList.remove('hidden');
+                } else {
+                    updateBtn.textContent = 'Up to Date';
+                    updateBtn.classList.remove('hidden');
+                    updateBtn.classList.add('up-to-date');
+                    updateBtn.href = '#';
+                    updateBtn.target = '';
+                }
+
+                // 4. Set up changelog modal
+                changelogPrompt.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    try {
+                        // A more robust markdown to HTML converter
+                        const releaseNotesHtml = data.body
+                            .replace(/\r\n/g, '\n')
+                            .replace(/\n\n/g, '<br><br>')
+                            .replace(/### (.*?)(\n|$)/g, '<h3>$1</h3>$2')
+                            .replace(/## (.*?)(\n|$)/g, '<h2>$1</h2>$2')
+                            .replace(/# (.*?)(\n|$)/g, '<h1>$1</h1>$2')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                            .replace(/\n- (.*?)(?=\n|$)/g, '\n<li>$1</li>')
+                            .replace(/\n\* (.*?)(?=\n|$)/g, '\n<li>$1</li>')
+                            .replace(/`(.*?)`/g, '<code>$1</code>')
+                            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+                            .replace(/\n(?!<)/g, '<br>');
+                        
+                        changelogBody.innerHTML = releaseNotesHtml;
+                        changelogModal.classList.remove('hidden');
+                    } catch (error) {
+                        console.error('Error processing changelog:', error);
+                        changelogBody.innerHTML = '<p>Error displaying changelog content.</p>';
+                        changelogModal.classList.remove('hidden');
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Could not fetch latest version:", error);
+                latestVersionEl.textContent = 'Error';
+            });
+
+        // 5. Modal close logic
+        closeModalBtn.addEventListener('click', () => changelogModal.classList.add('hidden'));
+        changelogModal.addEventListener('click', (e) => {
+            if (e.target === changelogModal) {
+                changelogModal.classList.add('hidden');
+            }
+        });
+    };
+
+    // Initialize the About section
+    initializeAboutSection();
 });
