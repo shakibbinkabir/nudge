@@ -161,7 +161,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                             if (allTasksCompleted || noTasks) {
                                 return; // Allow navigation to continue
                             }
-                            const interventionUrl = chrome.runtime.getURL("../pages/intervention.html") + "?originalUrl=" + encodeURIComponent(url);
+                            const interventionUrl = chrome.runtime.getURL("pages/intervention.html") + "?originalUrl=" + encodeURIComponent(url);
                             chrome.tabs.update(tabId, { url: interventionUrl });
                         });
                     }
