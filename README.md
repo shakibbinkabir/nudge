@@ -1,14 +1,12 @@
-# Nudge v0.7.0 (Pre-Release)
+# Nudge
 
-[](https://opensource.org/licenses/MIT)
-[](https://www.google.com/search?q=)
-[](https://www.google.com/search?q=)
+[](https://opensource.org/licenses/MIT) [](https://github.com/shakibbinkabir/nudge/releases) [](https://www.google.com/search?q=)
 
 **Your intelligent and sassy sidekick against procrastination.** Nudge is a productivity-focused Chrome extension that transforms your new tab page into a smart, beautiful, and focused workspace designed to keep you on track.
 
 -----
 
-> ✨ **Note:** This is a pre-release version. It's in a stable, usable state, but you may encounter minor issues. Your feedback is highly appreciated\!
+> ✨ **Note:** This project is currently in active development for the v1.0 launch. The latest pre-release is **v0.7.0**. It is stable and feature-complete. Your feedback is highly appreciated\!
 
 ## About The Project
 
@@ -18,17 +16,19 @@ It replaces your default new tab with a dashboard that surfaces your most import
 
 ### Screenshots
 
-> *Will be added in the v1.0*
+> *Will be added in the v1.0 launch.*
 
 -----
 
 ## Key Features
 
-  * ✨ **Dynamic & Inspiring New Tab Page**: A beautiful, auto-refreshing background image to create a calm and focused environment.
-  * ✅ **Intelligent Task Prioritization**: A to-do list that automatically sorts your tasks by completion status, priority level, and deadline, ensuring you always see what matters most.
-  * 🚫 **Distraction Intervention System**: Define your own list of distracting websites. Nudge will intercept your visit and gently remind you of your priorities.
-  * 🧘 **Flexible Snooze Functionality**: Need to visit a blocked site? You can "snooze" the block for a set duration, giving you the flexibility you need.
-  * ⚙️ **Dual API Key System**: Choose between an easy, one-click setup using the Nudge API or bring your own Pexels key for unlimited, private access to background images.
+  * ✨ **Dynamic & Inspiring New Tab Page**: A beautiful, auto-refreshing background image with a readability overlay.
+  * ✅ **Intelligent Task Prioritization**: A to-do list that automatically sorts tasks by completion status, priority level, and deadline.
+  * 🧠 **Smart Task Input**: The "Add Task" field can intelligently detect dates and priorities from natural language (e.g., "Finish report by Friday high priority").
+  * 🚫 **Advanced Distraction Management**: A completely redesigned system to manage your blacklist with Block/Unblock toggles, favicons for easy identification, and a real-time favicon preview.
+  * 🧘 **Fully Animated Intervention UI**: A beautiful "frosted glass" intervention page that animates in sequence to gently guide you back to focus.
+  * ⚙️ **State-Aware Settings Dashboard**: A professional, "Tech Dashboard" style settings page that dynamically adapts to your configuration.
+  * 🔐 **Dual API Key System**: Choose between an easy email/OTP setup using the Nudge API or bring your own Pexels key for unlimited, private access.
 
 -----
 
@@ -37,47 +37,44 @@ It replaces your default new tab with a dashboard that surfaces your most import
 Nudge operates on two core principles:
 
 1.  **Reinforce Focus**: By replacing the new tab with your prioritized tasks, it constantly reminds you of your goals, making it easier to stay on track.
-2.  **Interrupt Distraction**: By redirecting you from a blacklisted site to an intervention page, it breaks the mindless habit loop of visiting distracting sites and forces a moment of conscious choice.
+2.  **Interrupt Distraction**: By redirecting you from a blacklisted site to the new animated intervention page, it breaks the mindless habit loop and forces a moment of conscious choice.
 
 ### The Nudge API (`lab.shakibbinkabir.me`)
 
-To provide beautiful background images without requiring every user to sign up for a developer account, Nudge uses a proxy API hosted at `lab.shakibbinkabir.me`.
+To provide background images without requiring every user to sign up for a developer account, Nudge uses a proxy API.
 
-  * **How it works**: When you use the "Free API Key" option, the extension communicates with this secure backend. The backend then fetches an image from Pexels using a central API key and sends it back to you.
-  * **Rate Limiting**: To ensure fair usage for everyone, this service is rate-limited to **16 background image requests per month** per user. This is typically enough for a fresh background every other day.
+  * **How it works**: When you use the "Free API Key" option, the extension communicates with this secure backend, which fetches an image from Pexels and sends it back to you.
+  * **Rate Limiting**: This service is rate-limited to **16 background image requests per month** per user.
 
 -----
 
-## Installation (Pre-Release)
+## Installation (Latest Pre-Release: v0.7.0)
 
-As this is a pre-release, it's not on the Chrome Web Store yet. You can install it manually:
-
-1.  Download the `nudge-v0.7.0.zip` file from the [Releases](https://github.com/shakibbinkabir/nudge/releases) page.
-2.  Unzip the downloaded file into a folder on your computer.
+1.  Download the `nudge-v0.7.0-pre-release.zip` file from the [Releases](https://github.com/shakibbinkabir/nudge/releases) page.
+2.  Unzip the downloaded file.
 3.  Open Google Chrome and navigate to `chrome://extensions`.
-4.  Enable **"Developer mode"** using the toggle switch in the top-right corner.
-5.  Click the **"Load unpacked"** button.
-6.  Select the unzipped folder you created in step 2. The Nudge extension icon should now appear in your extensions bar.
+4.  Enable **"Developer mode"** using the toggle in the top-right corner.
+5.  Click **"Load unpacked"**.
+6.  Select the unzipped `nudge-extension` folder. The Nudge icon should appear.
 
 -----
 
 ## Configuration & Setup
 
-After installation, open a new tab. You will be prompted to configure the background image source. You have two options, which can be configured on the settings page (click the ⚙️ icon).
+After installation, open the settings page by clicking the Nudge icon in your extensions bar or the gear icon on the new tab page.
 
 #### Option 1: Use the Nudge API (Easy Setup)
 
-1.  In the settings page, under "Option 1," enter your email address and click "Get Verification Code."
+1.  On the settings page, in the "API Keys" section, enter your email and click "Get Verification Code."
 2.  Check your email for a 6-digit OTP.
-3.  Enter the OTP on the settings page and click "Verify & Save Key."
-4.  That's it\! Your extension is ready to fetch backgrounds.
+3.  Enter the OTP and click "Verify & Save Key."
 
 #### Option 2: Use Your Own Pexels Key (BYOK)
 
-1.  Go to [Pexels.com/api/](https://www.pexels.com/api/) and create a free account to get your personal API key.
-2.  In the Nudge settings page, under "Option 2," paste your Pexels key into the input field.
-3.  Click "Save Pexels Key."
-4.  This method gives you 25,000 calls per month, private access and does not use the Nudge API service.
+1.  Go to [Pexels.com/api/](https://www.pexels.com/api/) to get your free personal API key.
+2.  On the settings page, toggle to the "Use Your Own Pexels Key" option.
+3.  Paste your key into the input field and click "Save Pexels Key." The extension will validate it before saving.
+4.  This method gives you a much higher personal limit (20,000 requests/month) and does not use the Nudge API service.
 
 -----
 
@@ -85,21 +82,21 @@ After installation, open a new tab. You will be prompted to configure the backgr
 
 Interested in contributing? Here’s how to get the project running.
 
-### Nudge Extension
-
 1.  Clone the repository:
     ```sh
     git clone https://github.com/shakibbinkabir/nudge.git
     ```
-2.  Follow the **Installation** steps above to load the `nudge` directory as an unpacked extension.
+2.  The extension code is in the `/nudge-extension` directory.
+3.  Follow the **Installation** steps above to load the `/nudge-extension` directory as an unpacked extension.
 
+-----
 
 ## Roadmap
 
-This pre-release is just the beginning. Here are some features planned for future versions:
-
-  * **v1.0.0:** UI/UX Polish and a guided user onboarding tour and some minor features add/tweak.
+  * **v1.0.0 (Next Release\!):** Final API update (dynamic queries), project file restructuring, and the official Launch on GitHub\!
   * **v1.1.0:** Data Synchronization across devices using `chrome.storage.sync`.
+  * **v1.5.0:** Prepare and publish to the Firefox Add-ons store.
+  * **Future:** Gamification features (streaks, rewards), advanced customization options, and more.
 
 -----
 
