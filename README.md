@@ -1,13 +1,13 @@
 # Nudge v1.0
 
-[](https://opensource.org/licenses/MIT)
-[](https://www.google.com/search?q=)
-[](https://www.google.com/search?q=)
+
+[](https://opensource.org/licenses/MIT) [](https://github.com/shakibbinkabir/nudge/releases) [](https://www.google.com/search?q=)
 
 **Your intelligent and sassy sidekick against procrastination.**  
 Nudge is a productivity-focused Chrome extension that transforms your new tab page into a smart, beautiful, and focused workspace designed to keep you on track.
 
 ---
+
 
 > ✨ **Note:** This is the first stable release (v1.0). Screenshots and additional documentation will be added soon. Your feedback is highly appreciated!
 
@@ -19,11 +19,13 @@ It replaces your default new tab with a dashboard that surfaces your most import
 
 ### Screenshots
 
+
 > *Screenshots will be added in the v1.0 documentation update.*
 
 ---
 
 ## Key Features
+
 
 - ✨ **Dynamic & Inspiring New Tab Page:** Beautiful, auto-refreshing background images (24-hour cache) to create a calm and focused environment.
 - ✅ **Intelligent Task Prioritization:** To-do list that automatically sorts your tasks by completion status, priority level, and deadline.
@@ -46,12 +48,14 @@ Nudge operates on two core principles:
 
 ### The Nudge API (`lab.shakibbinkabir.me`)
 
-To provide beautiful background images without requiring every user to sign up for a developer account, Nudge uses a proxy API hosted at `lab.shakibbinkabir.me`.
+To provide background images without requiring every user to sign up for a developer account, Nudge uses a proxy API.
+
 
 - **How it works:** When you use the "Free API Key" option, the extension communicates with this secure backend. The backend then fetches an image from Pexels using a central API key and sends it back to you.
 - **Rate Limiting:** The service is rate-limited to **64 background image requests per month** per user. This is typically enough for a fresh background every day.
 
 ---
+
 
 ## Installation
 
@@ -60,29 +64,29 @@ As this is a stable release, you can install it manually:
 1.  Download the `nudge-v1.0.zip` file from the [Releases](https://github.com/shakibbinkabir/nudge/releases) page.
 2.  Unzip the downloaded file into a folder on your computer.
 3.  Open Google Chrome and navigate to `chrome://extensions`.
-4.  Enable **"Developer mode"** using the toggle switch in the top-right corner.
-5.  Click the **"Load unpacked"** button.
-6.  Select the unzipped folder you created in step 2. The Nudge extension icon should now appear in your extensions bar.
+4.  Enable **"Developer mode"** using the toggle in the top-right corner.
+5.  Click **"Load unpacked"**.
+6.  Select the unzipped `nudge-extension` folder. The Nudge icon should appear.
 
 ---
 
 ## Configuration & Setup
 
-After installation, open a new tab. You will be prompted to configure the background image source. You have two options, which can be configured on the settings page (click the ⚙️ icon).
+After installation, open the settings page by clicking the Nudge icon in your extensions bar or the gear icon on the new tab page.
 
 #### Option 1: Use the Nudge API (Easy Setup)
 
-1.  In the settings page, under "Option 1," enter your email address and click "Get Verification Code."
+1.  On the settings page, in the "API Keys" section, enter your email and click "Get Verification Code."
 2.  Check your email for a 6-digit OTP.
 3.  Enter the OTP on the settings page and click "Verify & Save Key."
 4.  That's it! Your extension is ready to fetch backgrounds.
 
 #### Option 2: Use Your Own Pexels Key (BYOK)
 
-1.  Go to [Pexels.com/api/](https://www.pexels.com/api/) and create a free account to get your personal API key.
-2.  In the Nudge settings page, under "Option 2," paste your Pexels key into the input field.
-3.  Click "Save Pexels Key."
-4.  This method gives you 25,000 calls per month, private access and does not use the Nudge API service.
+1.  Go to [Pexels.com/api/](https://www.pexels.com/api/) to get your free personal API key.
+2.  On the settings page, toggle to the "Use Your Own Pexels Key" option.
+3.  Paste your key into the input field and click "Save Pexels Key." The extension will validate it before saving.
+4.  This method gives you a much higher personal limit (20,000 requests/month) and does not use the Nudge API service.
 
 ---
 
@@ -90,13 +94,12 @@ After installation, open a new tab. You will be prompted to configure the backgr
 
 Interested in contributing? Here’s how to get the project running.
 
-### Nudge Extension
-
 1.  Clone the repository:
     ```sh
     git clone https://github.com/shakibbinkabir/nudge.git
     ```
-2.  Follow the **Installation** steps above to load the `nudge` directory as an unpacked extension.
+2.  The extension code is in the `/nudge-extension` directory.
+3.  Follow the **Installation** steps above to load the `/nudge-extension` directory as an unpacked extension.
 
 ---
 
