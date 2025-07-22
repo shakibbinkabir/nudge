@@ -2,6 +2,38 @@
 
 All notable changes to the Nudge Chrome Extension will be documented in this file.
 
+## [1.0] - 2025-07-22
+
+### Added
+- **v1.0 Release:** First stable release of Nudge Chrome Extension.
+- **Modern Project Structure:** All source files organized into dedicated folders for maintainability.
+- **Dual API System:** Choose between a free Nudge API key (now 64/month) or your own Pexels API key for unlimited backgrounds.
+- **Dynamic Backgrounds:** Beautiful, auto-refreshing images for both New Tab and Intervention pages, with 24-hour caching.
+- **Intelligent Task Management:** Prioritized to-do list with deadline and urgency detection.
+- **Distraction Management:** Block/unblock and delete distracting domains, with favicon previews.
+- **Intervention System:** Motivational and quirky messages, snooze options, and animated transitions.
+- **Modern "Tech Dashboard" UI:** Redesigned settings page with sidebar navigation, glassmorphism, and responsive design.
+- **Usage Statistics:** Visual usage bar for Nudge API requests.
+- **Quick Start Guide:** Onboarding steps in the About section.
+
+### Changed
+- **API Rate Limit:** Increased Nudge API free tier to 64 requests/month.
+- **Cache Duration:** Background images now refresh every 24 hours (was previously 12 or 48 hours).
+- **Settings UI:** Improved API key management, validation, and feedback.
+- **Blacklist:** Enhanced with toggle and delete actions, and real-time favicon preview.
+- **Versioning:** Updated manifest and documentation to v1.0.
+
+### Fixed
+- **API Key Validation:** Robust validation for user-provided Pexels keys.
+- **UI Consistency:** Standardized date formats and improved error handling.
+- **Version Display:** Fixed About section to always show installed version if GitHub fetch fails.
+
+### Enhanced
+- **User Experience:** Smoother animations, improved accessibility, and clearer feedback throughout the extension.
+- **Documentation:** Updated README and in-app guides for clarity and completeness.
+
+---
+
 ## [0.9.9] - 2025-07-22
 
 ### Changed

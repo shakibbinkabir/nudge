@@ -487,7 +487,12 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 console.error("Could not fetch latest version:", error);
-                latestVersionEl.textContent = 'Error';
+                latestVersionEl.textContent = `v${installedVersion}`;
+                updateBtn.textContent = 'Up to Date';
+                    updateBtn.classList.remove('hidden');
+                    updateBtn.classList.add('up-to-date');
+                    updateBtn.href = '#';
+                    updateBtn.target = '';
             });
 
         // 5. Modal close logic
