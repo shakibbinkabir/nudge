@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     //  BACKGROUND IMAGE FUNCTIONALITY (REFACTORED for v2 WITH CACHING)
     // =================================================================
-    const FORTY_EIGHT_HOURS_IN_MS = 48 * 60 * 60 * 1000;
+    const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // Cache for 24 hours
 
     // Set background using either cached blob or URL
     const setBackground = (bgData) => {
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const bgBlob = result.backgroundImageBlob;
                 
                 // Check if cache is valid (less than 48 hours old)
-                if (bgData && (now - lastFetch < FORTY_EIGHT_HOURS_IN_MS)) {
+                if (bgData && (now - lastFetch < CACHE_DURATION_MS)) {
                     console.log("Using cached background image. Hours since last fetch:", Math.floor((now - lastFetch) / (1000 * 60 * 60)));
                     
                     try {
@@ -365,9 +365,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Case 1: User has their own Pexels key ---
                 console.log("Fetching new image with user-provided Pexels key.");
                 // Use search endpoint with more specific parameters to avoid 500 errors
-                const pexelsUrl = "https://api.pexels.com/v1/search?query=dark+landscape&per_page=20";
+                const PEXELS_API_URL = "https://api.pexels.com/v1/search?query=dark%20landscape&per_page=20";
                 console.log("Fetching from Pexels:", pexelsUrl);
-                response = await fetch(pexelsUrl, {
+                response = await fetch(PEXELS_API_URL, {
                     headers: { 'Authorization': keys.userPexelsKey }
                 });
                 
@@ -476,14 +476,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (keys.nudgeApiKey) {
                 // --- Case 2: User has a Nudge API key ---
                 console.log("Fetching new image with Nudge API key.");
-                const nudgeApiUrl = 'https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/image.php';
+                const NUDGE_API_URL = 'https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/image.php?query=dark%20landscape';
                 
                 try {
                     // Create an AbortController with timeout
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
                     
-                    response = await fetch(nudgeApiUrl, {
+                    response = await fetch(NUDGE_API_URL, {
                         headers: { 'X-API-KEY': keys.nudgeApiKey },
                         signal: controller.signal
                     });

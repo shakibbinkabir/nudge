@@ -11,9 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     //  1. DYNAMIC BACKGROUND LOGIC (FINAL IMPLEMENTATION)
     // =================================================================
-    const PEXELS_QUERY = "Dark Nature";
-    const NUDGE_API_URL = 'https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/image.php';
-    const PEXELS_API_URL = `https://api.pexels.com/v1/search?query=${encodeURIComponent(PEXELS_QUERY)}&per_page=20`;
+    const NUDGE_API_URL = 'https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/image.php?query=dark%20nature';
+    const PEXELS_API_URL = `https://api.pexels.com/v1/search?query=dark%20nature&per_page=20`;
     const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // Cache for 24 hours
 
 
