@@ -6,6 +6,7 @@
 
 ---
 
+
 > ✨ **Note:** This is the first stable release (v1.0). Your feedback is highly appreciated!
 
 ## About The Project
@@ -16,6 +17,7 @@ It replaces your default new tab with a dashboard that surfaces your most import
 
 ### Screenshots
 
+
 ![Nudge New Tab Page](assets/presentation/ss_new_tab.jpg)
 
 | Gentle Intervention | Powerful Settings |
@@ -25,6 +27,7 @@ It replaces your default new tab with a dashboard that surfaces your most import
 ---
 
 ## Key Features
+
 
 -   ✨ **Dynamic & Inspiring New Tab Page:** Beautiful, auto-refreshing background images (24-hour cache) to create a calm and focused environment.
 -   ✅ **Intelligent Task Prioritization:** To-do list that automatically sorts your tasks by completion status, priority level, and deadline.
@@ -46,12 +49,14 @@ Nudge operates on two core principles:
 
 ### The Nudge API (`lab.shakibbinkabir.me`)
 
+
 To provide beautiful background images without requiring every user to sign up for a developer account, Nudge uses a proxy API.
 
 -   **How it works:** When you use the "Free API Key" option, the extension communicates with this secure backend, which fetches an image from Pexels and sends it back to you.
 -   **Rate Limiting:** The service is rate-limited to **64 background image requests per month** per user.
 
 ---
+
 
 ## Installation
 
@@ -73,12 +78,14 @@ After installation, open the settings page by clicking the Nudge icon in your ex
 1.  On the settings page, navigate to "API Keys."
 2.  Enter your email address and click "Get Verification Code."
 3.  Check your email for a 6-digit OTP and enter it to verify.
+4.  That's it! Your extension is ready to fetch backgrounds.
 
 #### Option 2: Use Your Own Pexels Key (BYOK)
 
 1.  Go to [Pexels.com/api/](https://www.pexels.com/api/) to get your free personal API key.
 2.  On the settings page, toggle to the "Use Your Own Pexels Key" option.
 3.  Paste your key into the input field and click "Save Pexels Key." The extension will validate it before saving.
+4.  This method gives you a much higher personal limit (25,000 requests/month) and does not use the Nudge API service.
 
 ---
 
@@ -91,6 +98,7 @@ Interested in contributing? Here’s how to get the project running.
     git clone https://github.com/shakibbinkabir/nudge.git
     ```
 2.  The extension code is located in the root of the repository. Follow the **Installation** steps above to load the project directory as an unpacked extension.
+
 
 ---
 
