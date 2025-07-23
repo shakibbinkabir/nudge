@@ -134,7 +134,7 @@ Distributed under the MIT License. See [`LICENSE.txt`](https://github.com/shakib
 
 Hey there, I'm Shakib.
 
-I'm a 20-year-old developer from Bangladesh, running on coffee and about a dozen parallel thought processes, thanks to ADHD. My brain is like a browser with 100 tabs open—all of them playing different music. The "one quick YouTube video" often turns into a two-hour deep dive into anything but the code I'm supposed to be writing.
+I'm a 20-year-old developer from Bangladesh, running on coffee and about a dozen parallel thought processes. My brain is like a browser with 100 tabs open—all of them playing different music. The "one quick YouTube video" often turns into a two-hour deep dive into anything but the code I'm supposed to be writing.
 
 Standard to-do lists felt like a parent nagging me. I didn't need another list; I needed a *sidekick*. Something that would show up at the exact moment of weakness—when that new tab opens—and sassily ask, "Are you *sure* you want to do that?"
 
