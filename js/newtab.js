@@ -361,12 +361,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let response;
             let data;
             
+            // TEMPORARY: Nudge API disabled — force Pexels path if available
             if (keys.userPexelsKey) {
                 // --- Case 1: User has their own Pexels key ---
                 console.log("Fetching new image with user-provided Pexels key.");
                 // Use search endpoint with more specific parameters to avoid 500 errors
                 const PEXELS_API_URL = "https://api.pexels.com/v1/search?query=dark%20landscape&per_page=20";
-                console.log("Fetching from Pexels:", pexelsUrl);
+                console.log("Fetching from Pexels:", PEXELS_API_URL);
                 response = await fetch(PEXELS_API_URL, {
                     headers: { 'Authorization': keys.userPexelsKey }
                 });
@@ -474,74 +475,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     setBackground(bgData);
                 }
             } else if (keys.nudgeApiKey) {
-                // --- Case 2: User has a Nudge API key ---
-                console.log("Fetching new image with Nudge API key.");
-                const NUDGE_API_URL = 'https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/image.php?query=dark%20landscape';
-                
-                try {
-                    // Create an AbortController with timeout
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
-                    
-                    response = await fetch(NUDGE_API_URL, {
-                        headers: { 'X-API-KEY': keys.nudgeApiKey },
-                        signal: controller.signal
-                    });
-                    
-                    clearTimeout(timeoutId); // Clear the timeout if request completes
-                    
-                    // Check if the response is OK before parsing JSON
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        try {
-                            const errorJson = JSON.parse(errorText);
-                            throw new Error(errorJson.error || `Nudge API error: ${response.status}`);
-                        } catch (e) {
-                            throw new Error(`Nudge API error: ${response.status}. Please verify your API key.`);
-                        }
-                    }
-                } catch (err) {
-                    console.error("Network error with Nudge API:", err);
-                    throw new Error(`Network error with Nudge API: ${err.message}`);
-                }
-                
-                try {
-                    data = await response.json();
-                    if (!data || !data.image_url || !data.photographer || !data.photographer_url) {
-                        throw new Error('Invalid response format from Nudge API');
-                    }
-                } catch (err) {
-                    console.error("Error parsing Nudge API response:", err);
-                    throw new Error(`Error parsing Nudge API response: ${err.message}`);
-                }
-                
-                // Download and cache the actual image
-                const imageBlob = await downloadAndCacheImage(data.image_url);
-                if (imageBlob) {
-                    data.imageBlob = imageBlob;
-                    
-                    // Convert blob to base64 for storage
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                        // Get base64 string without the prefix
-                        const base64data = reader.result.split(',')[1];
-                        
-                        // Save both the image metadata and the image blob
-                        chrome.storage.local.set({
-                            backgroundImageData: data,
-                            backgroundImageBlob: base64data,
-                            lastFetchTimestamp: Date.now()
-                        });
-                    };
-                    reader.readAsDataURL(imageBlob);
-                }
-                
-                setBackground(data);
+                // TEMPORARY: Nudge API is disabled
+                console.warn('Nudge API temporarily unavailable. Please use a Pexels API key in settings.');
+                attributionContainer.innerHTML = `Nudge API is temporarily unavailable. Please add a Pexels API key in <a href="#" id="open-options-link-temp">settings</a>.`;
+                document.getElementById('open-options-link-temp').addEventListener('click', () => chrome.runtime.openOptionsPage());
+                // Try cached fallback
+                useCachedImageAsFallback(new Error('Nudge API temporarily disabled'));
             } else {
                 // --- Case 3: No keys configured ---
                 console.log("No API key configured.");
                 // Use fallback background
-                document.body.style.backgroundImage = `url('background.jpg')`;
+                document.body.style.backgroundImage = `url('../assets/background.jpg')`;
                 attributionContainer.innerHTML = 'Please set an API key in the <a href="#" id="open-options-link">settings</a> to load backgrounds.';
                 document.getElementById('open-options-link').addEventListener('click', () => chrome.runtime.openOptionsPage());
                 
@@ -562,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Also try to use cached image as fallback
                 useCachedImageAsFallback(error);
-            } else if (keys.nudgeApiKey && error.message.includes('Nudge API')) {
+        } else if (keys.nudgeApiKey && error.message.includes('Nudge API')) {
                 console.warn("There seems to be an issue with the Nudge API server: ", error.message);
                 
                 if (error.message.includes('502')) {
@@ -571,8 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     attributionContainer.innerHTML = `${errorMsg} <a href="#" id="try-again-link">Try again</a>`;
                     document.getElementById('try-again-link').addEventListener('click', () => handleBackground());
                 } else {
-                    // Other Nudge API errors
-                    const errorMsg = `There was a problem with the Nudge API: ${error.message}.`;
+            // Other Nudge API errors; show disabled notice
+            const errorMsg = `Nudge API is temporarily turned off. Please use a Pexels API key.`;
                     attributionContainer.innerHTML = `${errorMsg} <a href="#" id="open-options-link-error">Check settings</a>`;
                     document.getElementById('open-options-link-error').addEventListener('click', () => chrome.runtime.openOptionsPage());
                 }
@@ -635,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setBackground(bgData);
             } else {
                 // As a last resort, use the local static image
-                document.body.style.backgroundImage = `url('background.jpg')`;
+                document.body.style.backgroundImage = `url('../assets/background.jpg')`;
                 attributionContainer.innerHTML = `Error: ${originalError.message}. <a href="#" id="open-options-link-error">Check settings.</a>`;
                 document.getElementById('open-options-link-error').addEventListener('click', () => chrome.runtime.openOptionsPage());
             }

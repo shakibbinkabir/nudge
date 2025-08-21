@@ -2,6 +2,17 @@
 
 All notable changes to the Nudge Chrome Extension will be documented in this file.
 
+## [1.0.1] - 2025-08-21
+
+### Changed
+- Temporarily disabled Nudge API usage across the extension due to server issues.
+- New tab now shows a notice and uses cached background when available; otherwise falls back gracefully.
+- Settings page updated with a clear banner and the Nudge API section disabled.
+- Documentation updated with step-by-step Pexels key setup; project version bumped to v1.0.1.
+
+### Action Required
+- Users must configure a personal Pexels API key in Settings until Nudge API is restored.
+
 ## [1.0] - 2025-07-22
 
 ### Added

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Nudge",
-  "version": "1.0",
+  "version": "1.0.1",
   "description": "A beautiful and smart new tab page to help you focus on your tasks.",
   "icons": {
     "16": "assets/icons/nudge-16x16.png",

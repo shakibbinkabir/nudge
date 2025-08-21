@@ -1,13 +1,13 @@
-# Nudge v1.0
+# Nudge v1.0.1
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Version](https://img.shields.io/badge/version-v1.0-green.svg)](https://github.com/shakibbinkabir/nudge/releases) [![Status](https://img.shields.io/badge/status-stable-brightgreen.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Version](https://img.shields.io/badge/version-v1.0.1-green.svg)](https://github.com/shakibbinkabir/nudge/releases) [![Status](https://img.shields.io/badge/status-stable-brightgreen.svg)]()
 
 **Your intelligent and sassy sidekick against procrastination.** Nudge is a productivity-focused Chrome extension that transforms your new tab page into a smart, beautiful, and focused workspace designed to keep you on track.
 
 ---
 
 
-> ✨ **Note:** This is the first stable release (v1.0). Your feedback is highly appreciated!
+> 🚨 Temporary Notice: Nudge API is turned off due to server issues. Please use a personal Pexels API key until further notice. You’ll be notified once Nudge API is back.
 
 ## About The Project
 
@@ -52,7 +52,9 @@ Nudge operates on two core principles:
 
 To provide beautiful background images without requiring every user to sign up for a developer account, Nudge uses a proxy API.
 
--   **How it works:** When you use the "Free API Key" option, the extension communicates with this secure backend, which fetches an image from Pexels and sends it back to you.
+Note: Temporarily unavailable. The steps below guide you to use your own Pexels key.
+
+-   **How it works (when enabled):** When you use the "Free API Key" option, the extension communicates with this secure backend, which fetches an image from Pexels and sends it back to you.
 -   **Rate Limiting:** The service is rate-limited to **64 background image requests per month** per user.
 
 ---
@@ -60,7 +62,7 @@ To provide beautiful background images without requiring every user to sign up f
 
 ## Installation
 
-1.  Download the `nudge-v1.0.zip` file from the [Releases](https://github.com/shakibbinkabir/nudge/releases) page.
+1.  Download the `nudge-v1.0.1.zip` file from the [Releases](https://github.com/shakibbinkabir/nudge/releases) page.
 2.  Unzip the downloaded file into a folder on your computer.
 3.  Open Google Chrome and navigate to `chrome://extensions`.
 4.  Enable **"Developer mode"** using the toggle switch in the top-right corner.
@@ -73,19 +75,21 @@ To provide beautiful background images without requiring every user to sign up f
 
 After installation, open the settings page by clicking the Nudge icon in your extensions bar or the gear icon on the new tab page.
 
-#### Option 1: Use the Nudge API (Easy Setup)
+#### Required (Temporary): Use Your Own Pexels Key (BYOK)
 
-1.  On the settings page, navigate to "API Keys."
-2.  Enter your email address and click "Get Verification Code."
-3.  Check your email for a 6-digit OTP and enter it to verify.
-4.  That's it! Your extension is ready to fetch backgrounds.
+Follow these steps to set up a Pexels API key:
 
-#### Option 2: Use Your Own Pexels Key (BYOK)
-
-1.  Go to [Pexels.com/api/](https://www.pexels.com/api/) to get your free personal API key.
-2.  On the settings page, toggle to the "Use Your Own Pexels Key" option.
-3.  Paste your key into the input field and click "Save Pexels Key." The extension will validate it before saving.
-4.  This method gives you a much higher personal limit (25,000 requests/month) and does not use the Nudge API service.
+1. Create a Pexels account
+    - Visit https://www.pexels.com/join/ and create a free account (or sign in).
+2. Get your API key
+    - Go to https://www.pexels.com/api/ and click “Get Started” or “Your API Key”.
+    - Fill the short form if prompted, then copy your API Key from the dashboard.
+3. Add the key to Nudge
+    - Open Nudge Settings (gear icon on the new tab or right-click the extension > Options).
+    - Go to API Keys > “Use Your Own Pexels Key”.
+    - Paste the key and click “Save Pexels Key”. The extension verifies the key before saving.
+4. Done
+    - Backgrounds will load using your key. Your key is stored locally in your browser storage.
 
 ---
 
@@ -104,6 +108,7 @@ Interested in contributing? Here’s how to get the project running.
 
 ## Roadmap
 
+-   **v1.0.2:** Re-enable Nudge API once server is fixed; add automatic migration notice.
 -   **v1.1.0:** Data synchronization across devices using `chrome.storage.sync`.
 -   **v1.5.0:** Prepare and publish to the Firefox Add-ons store.
 -   **Future:** Gamification features (streaks, rewards), advanced customization options, and more based on user feedback.

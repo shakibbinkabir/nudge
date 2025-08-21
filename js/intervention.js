@@ -58,12 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     photographerUrl = photo.photographer_url;
                 }
             } else if (keys.nudgeApiKey) {
-                const response = await fetch(NUDGE_API_URL, { headers: { 'X-API-KEY': keys.nudgeApiKey } });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Nudge API error');
-                imageUrlToCache = data.image_url;
-                photographer = data.photographer;
-                photographerUrl = data.photographer_url;
+                console.warn('Nudge API temporarily unavailable. Please use a Pexels API key in settings.');
             }
 
             if (imageUrlToCache) {
@@ -84,6 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 setBackground(cache.url, cache.photographer, cache.photographerUrl);
             } else {
                 fetchAndCacheBackground({ nudgeApiKey: result.nudgeApiKey, userPexelsKey: result.userPexelsKey });
+                if (result.nudgeApiKey && !result.userPexelsKey) {
+                    attributionContainer.innerHTML = `Nudge API is temporarily off. Add a Pexels key in <a href="#" id="open-options-intervention">settings</a>.`;
+                    const link = document.getElementById('open-options-intervention');
+                    if (link) link.addEventListener('click', () => chrome.runtime.openOptionsPage());
+                }
             }
         });
     };

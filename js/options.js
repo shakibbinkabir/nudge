@@ -36,19 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.values(apiStates).forEach(state => state.classList.add('hidden'));
         
         chrome.storage.local.get(['nudgeApiKey', 'userPexelsKey', 'connectedEmail', 'nudgeApiUsage'], (result) => {
-            
-            if (result.nudgeApiKey && result.connectedEmail) {
-                // User has Nudge API key
-                apiStates.nudge.classList.remove('hidden');
-                document.getElementById('connected-email-display').textContent = result.connectedEmail;
-                
-                // Display usage info if available
-                const usage = result.nudgeApiUsage || { count: 0 };
-                const usagePercent = Math.min((usage.count / 16) * 100, 100);
-                document.getElementById('usage-bar-fill').style.width = `${usagePercent}%`;
-                document.getElementById('usage-text').textContent = `Requests this month: ${usage.count} / 16`;
-            } 
-            else if (result.userPexelsKey) {
+            // TEMPORARY: Nudge API disabled -> Always prefer Pexels state
+            if (result.userPexelsKey) {
                 // User has Pexels key
                 apiStates.pexels.classList.remove('hidden');
                 const maskedKey = `••••••••••••${result.userPexelsKey.slice(-4)}`;
@@ -64,8 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const keyDisplay = document.getElementById('masked-pexels-key-display').closest('.status-display');
                     keyDisplay.parentNode.insertBefore(usageElement, keyDisplay.nextSibling);
                 }
-            } 
-            else {
+            } else {
                 // User has no API key configured
                 apiStates.disconnected.classList.remove('hidden');
                 
@@ -77,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Reset form visibility
                 updateCollapsibleVisibility();
+                // Show a banner about Nudge API unavailability
+                const notice = document.getElementById('nudge-disabled-notice');
+                if (notice) notice.classList.remove('hidden');
             }
         });
     };
@@ -135,63 +126,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Nudge API: Step 1 - Register Email & Get OTP ---
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        status1.textContent = 'Sending code...';
-        status1.className = 'status-message';
-
-        try {
-            const response = await fetch('https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/register.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailInput.value })
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
-           
-            status1.textContent = 'Verification code sent to your email!';
-            status1.classList.add('success');
-            verifyForm.classList.remove('hidden');
-            registerForm.style.display = 'none'; // Hide the register form
-            otpInput.focus(); // Focus on the OTP input field
-        } catch (error) {
-            status1.textContent = error.message;
-            status1.classList.add('error');
-        }
+        // TEMPORARY: Disable Nudge registration
+        status1.textContent = 'Nudge API is temporarily unavailable. Please use a Pexels API key below.';
+        status1.className = 'status-message error';
+        return;
     });
 
     // --- Nudge API: Step 2 - Verify OTP & Save Key ---
     verifyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        status1.textContent = 'Verifying code...';
-        status1.className = 'status-message';
-
-        try {
-            const response = await fetch('https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/verify.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: emailInput.value, otp: otpInput.value })
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'An unknown error occurred.');
-
-            // Save the new Nudge key and remove all Pexels key data
-            chrome.storage.local.remove(['userPexelsKey', 'pexelsRateLimit', 'pexelsRateRemaining', 'backgroundImageData', 'backgroundImageBlob', 'lastFetchTimestamp'], () => {
-                chrome.storage.local.set({
-                    nudgeApiKey: result.api_key,
-                    connectedEmail: emailInput.value,
-                    nudgeApiUsage: { count: 0 } // Initialize usage counter
-                }, () => {
-                    console.log("Nudge API key saved successfully");
-                    status1.textContent = 'Verification successful!';
-                    status1.classList.add('success');
-                    setTimeout(() => {
-                        initializeApiState(); // Refresh the UI to show the connected state
-                    }, 1000);
-                });
-            });
-        } catch (error) {
-            status1.textContent = error.message;
-            status1.classList.add('error');
-        }
+        // TEMPORARY: Disable Nudge verification
+        status1.textContent = 'Nudge API is temporarily unavailable. Please use a Pexels API key below.';
+        status1.className = 'status-message error';
+        return;
     });
 
     // --- Bring Your Own Key (BYOK) Logic ---
@@ -254,16 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to update collapsible content visibility
     const updateCollapsibleVisibility = () => {
         // Update visibility based on toggle state
-        if (nudgeToggle.checked) {
-            nudgeContent.style.maxHeight = '500px';
-            nudgeContent.style.opacity = '1';
-            nudgeContent.style.marginTop = '1.5rem';
-            pexelsToggle.checked = false;
-        } else {
-            nudgeContent.style.maxHeight = '0';
-            nudgeContent.style.opacity = '0';
-            nudgeContent.style.marginTop = '0';
-        }
+    // TEMPORARY: Force-hide Nudge content
+    nudgeToggle.checked = false;
+    nudgeContent.style.maxHeight = '0';
+    nudgeContent.style.opacity = '0';
+    nudgeContent.style.marginTop = '0';
         
         if (pexelsToggle.checked) {
             pexelsContent.style.maxHeight = '500px';
@@ -279,9 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add event listeners to checkboxes
     nudgeToggle.addEventListener('change', () => {
-        if (nudgeToggle.checked) {
-            pexelsToggle.checked = false;
-        }
+        // TEMPORARY: prevent enabling Nudge
+        nudgeToggle.checked = false;
         updateCollapsibleVisibility();
     });
    
