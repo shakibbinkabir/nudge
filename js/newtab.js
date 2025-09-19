@@ -241,12 +241,175 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =================================================================
-    //  BACKGROUND IMAGE FUNCTIONALITY (REFACTORED for v2 WITH CACHING)
+    //  BACKGROUND IMAGE FUNCTIONALITY (CENTRALIZED in v1.0.2)
     // =================================================================
-    const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // Cache for 24 hours
-
-    // Set background using either cached blob or URL
-    const setBackground = (bgData) => {
+    
+    // Load the centralized background utility (inline for compatibility)
+    // Note: This is a simplified version of the background utility for newtab use
+    
+    async function loadBackgroundImage() {
+        try {
+            // Get API keys
+            const result = await new Promise((resolve) => {
+                chrome.storage.local.get(['userPexelsKey', 'backgroundCache', 'connectionStatus'], resolve);
+            });
+            
+            const userPexelsKey = result.userPexelsKey;
+            const cache = result.backgroundCache;
+            
+            // Check if we have a valid cache first
+            if (cache && cache.expiresAt && Date.now() < cache.expiresAt) {
+                console.log('Using cached background');
+                displayBackground({
+                    image_url: cache.url,
+                    photographer: cache.photographer,
+                    photographer_url: cache.photographer_url,
+                    imageBlob: cache.imageBlob
+                });
+                return;
+            }
+            
+            // Try to fetch fresh background if we have a key
+            if (userPexelsKey) {
+                console.log('Fetching fresh background from Pexels');
+                const backgroundResult = await fetchPexelsBackground(userPexelsKey);
+                
+                if (backgroundResult.success) {
+                    displayBackground(backgroundResult.data);
+                    
+                    // Save to cache
+                    const now = Date.now();
+                    const cacheData = {
+                        url: backgroundResult.data.image_url,
+                        provider: 'pexels',
+                        fetchedAt: now,
+                        expiresAt: now + (24 * 60 * 60 * 1000), // 24 hours
+                        photographer: backgroundResult.data.photographer,
+                        photographer_url: backgroundResult.data.photographer_url,
+                        imageBlob: backgroundResult.data.imageBlob
+                    };
+                    
+                    chrome.storage.local.set({ 
+                        backgroundCache: cacheData,
+                        connectionStatus: 'byok'
+                    });
+                    return;
+                }
+            }
+            
+            // Use stale cache if available
+            if (cache && cache.url) {
+                console.log('Using stale cached background as fallback');
+                displayBackground({
+                    image_url: cache.url,
+                    photographer: cache.photographer || 'Unknown',
+                    photographer_url: cache.photographer_url || '#',
+                    imageBlob: cache.imageBlob
+                });
+                return;
+            }
+            
+            // Final fallback to local image
+            console.log('Using local fallback background');
+            displayLocalFallback();
+            chrome.storage.local.set({ connectionStatus: 'disconnected' });
+            
+        } catch (error) {
+            console.error('Error loading background:', error);
+            displayLocalFallback();
+        }
+    }
+    
+    async function fetchPexelsBackground(apiKey) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            
+            const response = await fetch('https://api.pexels.com/v1/search?query=dark%20nature&per_page=20', {
+                headers: { 'Authorization': apiKey },
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.photos || data.photos.length === 0) {
+                throw new Error('No photos returned from Pexels API');
+            }
+            
+            const randomIndex = Math.floor(Math.random() * data.photos.length);
+            const photo = data.photos[randomIndex];
+            
+            if (!photo || !photo.src) {
+                throw new Error('Invalid photo data structure');
+            }
+            
+            let imageUrl;
+            if (photo.src.large2x) {
+                imageUrl = photo.src.large2x;
+            } else if (photo.src.large) {
+                imageUrl = photo.src.large;
+            } else if (photo.src.medium) {
+                imageUrl = photo.src.medium;
+            } else if (photo.src.original) {
+                imageUrl = photo.src.original;
+            } else {
+                throw new Error('No suitable image URL found');
+            }
+            
+            const backgroundData = {
+                image_url: imageUrl,
+                photographer: photo.photographer || 'Unknown',
+                photographer_url: photo.photographer_url || '#'
+            };
+            
+            // Try to download and cache the image
+            try {
+                const imageBlob = await downloadImageForCache(imageUrl);
+                if (imageBlob) {
+                    backgroundData.imageBlob = imageBlob;
+                }
+            } catch (downloadError) {
+                console.warn('Failed to download image for caching:', downloadError);
+            }
+            
+            return { success: true, data: backgroundData };
+            
+        } catch (error) {
+            console.error('Pexels API error:', error);
+            return { success: false, error: error };
+        }
+    }
+    
+    async function downloadImageForCache(imageUrl) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        
+        try {
+            const response = await fetch(imageUrl, {
+                signal: controller.signal,
+                cache: 'no-store'
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error('Failed to download image');
+            }
+            
+            return await response.blob();
+        } catch (error) {
+            clearTimeout(timeoutId);
+            throw error;
+        }
+    }
+    
+    function displayBackground(bgData) {
         if (bgData.imageBlob) {
             // Use cached blob image
             const objectUrl = URL.createObjectURL(bgData.imageBlob);
@@ -259,7 +422,77 @@ document.addEventListener('DOMContentLoaded', () => {
         attributionContainer.innerHTML = `
             Photo by <a href="${bgData.photographer_url}" target="_blank">${bgData.photographer}</a> on <a href="https://pexels.com" target="_blank">Pexels</a>
         `;
-    };
+    }
+    
+    function displayLocalFallback() {
+        document.body.style.backgroundImage = `url('../assets/background.jpg')`;
+        attributionContainer.innerHTML = 'Please set an API key in the <a href="#" id="open-options-link">settings</a> to load backgrounds.';
+        document.getElementById('open-options-link').addEventListener('click', () => chrome.runtime.openOptionsPage());
+    }
+    
+    function showUpdateBanner() {
+        // Check if user should see the v1.0.2 update banner
+        chrome.storage.local.get(['dismissedBanners', 'schemaVersion'], (result) => {
+            const dismissedBanners = result.dismissedBanners || {};
+            const schemaVersion = result.schemaVersion || 1;
+            
+            // Show banner for users upgrading from v1.0.1 (schema version 1) who haven't dismissed it
+            if (schemaVersion >= 2 && !dismissedBanners.outageNotice102) {
+                const banner = document.createElement('div');
+                banner.id = 'update-banner';
+                banner.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    z-index: 1000;
+                    max-width: 500px;
+                    text-align: center;
+                    font-size: 14px;
+                    line-height: 1.4;
+                `;
+                
+                banner.innerHTML = `
+                    <div>
+                        <strong>Nudge v1.0.2 Update</strong><br>
+                        Background caching improved! Nudge API is still offline - please use a Pexels API key in <a href="#" id="banner-settings-link" style="color: #4A9EFF;">settings</a>.
+                        <button id="dismiss-banner" style="margin-left: 10px; padding: 4px 8px; border: none; background: #4A9EFF; color: white; border-radius: 4px; cursor: pointer;">Dismiss</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(banner);
+                
+                // Add event listeners
+                document.getElementById('banner-settings-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    chrome.runtime.openOptionsPage();
+                });
+                
+                document.getElementById('dismiss-banner').addEventListener('click', () => {
+                    banner.remove();
+                    const updatedBanners = { ...dismissedBanners, outageNotice102: true };
+                    chrome.storage.local.set({ dismissedBanners: updatedBanners });
+                });
+                
+                // Auto dismiss after 10 seconds
+                setTimeout(() => {
+                    if (banner.parentNode) {
+                        banner.remove();
+                    }
+                }, 10000);
+            }
+        });
+    }
+    
+    // Initialize background loading
+    loadBackgroundImage();
+    
+    // Show update banner if needed
+    showUpdateBanner();
 
     // Download and cache an image from a URL
     const downloadAndCacheImage = async (imageUrl) => {

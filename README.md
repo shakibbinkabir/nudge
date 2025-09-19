@@ -1,13 +1,13 @@
-# Nudge v1.0.1
+# Nudge v1.0.2
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Version](https://img.shields.io/badge/version-v1.0.1-green.svg)](https://github.com/shakibbinkabir/nudge/releases) [![Status](https://img.shields.io/badge/status-stable-brightgreen.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Version](https://img.shields.io/badge/version-v1.0.2-green.svg)](https://github.com/shakibbinkabir/nudge/releases) [![Status](https://img.shields.io/badge/status-stable-brightgreen.svg)]()
 
 **Your intelligent and sassy sidekick against procrastination.** Nudge is a productivity-focused Chrome extension that transforms your new tab page into a smart, beautiful, and focused workspace designed to keep you on track.
 
 ---
 
 
-> 🚨 Temporary Notice: Nudge API is turned off due to server issues. Please use a personal Pexels API key until further notice. You’ll be notified once Nudge API is back.
+> 🚨 **Nudge API Status:** The Nudge API remains offline due to server issues. Please use a personal Pexels API key for backgrounds. v1.0.2 features improved caching and automatic fallbacks for better reliability during the outage.
 
 ## About The Project
 

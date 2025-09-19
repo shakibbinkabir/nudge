@@ -35,13 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const initializeApiState = () => {
         Object.values(apiStates).forEach(state => state.classList.add('hidden'));
         
-        chrome.storage.local.get(['nudgeApiKey', 'userPexelsKey', 'connectedEmail', 'nudgeApiUsage'], (result) => {
+        chrome.storage.local.get(['nudgeApiKey', 'userPexelsKey', 'connectedEmail', 'nudgeApiUsage', 'connectionStatus'], (result) => {
             // TEMPORARY: Nudge API disabled -> Always prefer Pexels state
             if (result.userPexelsKey) {
                 // User has Pexels key
                 apiStates.pexels.classList.remove('hidden');
                 const maskedKey = `••••••••••••${result.userPexelsKey.slice(-4)}`;
                 document.getElementById('masked-pexels-key-display').textContent = maskedKey;
+                
+                // Add connection status badge
+                addConnectionStatusBadge('byok');
                 
                 // If we have rate limit information, display it
                 if (result.pexelsRateLimit && result.pexelsRateRemaining) {
@@ -57,6 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // User has no API key configured
                 apiStates.disconnected.classList.remove('hidden');
                 
+                // Add connection status badge
+                addConnectionStatusBadge('disconnected');
+                
                 // Reset toggle state
                 const nudgeToggle = document.getElementById('nudge-toggle');
                 const pexelsToggle = document.getElementById('pexels-toggle');
@@ -71,6 +77,65 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+
+    function addConnectionStatusBadge(status) {
+        // Remove existing status badge if present
+        const existingBadge = document.getElementById('connection-status-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        
+        // Create new status badge
+        const badge = document.createElement('div');
+        badge.id = 'connection-status-badge';
+        badge.className = 'connection-status-badge';
+        
+        let statusText, statusClass;
+        switch(status) {
+            case 'byok':
+                statusText = '✓ Connected via BYOK';
+                statusClass = 'status-connected';
+                break;
+            case 'nudge':
+                statusText = '✓ Connected via Nudge API';
+                statusClass = 'status-connected';
+                break;
+            case 'disconnected':
+            default:
+                statusText = '✗ Disconnected';
+                statusClass = 'status-disconnected';
+                break;
+        }
+        
+        badge.innerHTML = `<span class="${statusClass}">${statusText}</span>`;
+        badge.style.cssText = `
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        `;
+        
+        // Style based on status
+        if (status === 'disconnected') {
+            badge.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            badge.style.color = '#DC2626';
+            badge.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+        } else {
+            badge.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
+            badge.style.color = '#059669';
+            badge.style.border = '1px solid rgba(34, 197, 94, 0.2)';
+        }
+        
+        // Insert the badge at the top of the API Keys section
+        const apiKeysSection = document.getElementById('api-keys');
+        if (apiKeysSection) {
+            const contentHeader = apiKeysSection.querySelector('.content-header');
+            if (contentHeader) {
+                contentHeader.appendChild(badge);
+            }
+        }
+    }
 
     // Initialize blacklist table
     // This is now handled by initializeBlacklist() in the BLACKLIST LOGIC section
@@ -107,6 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     disconnectNudgeBtn.addEventListener('click', () => {
         chrome.storage.local.remove(['nudgeApiKey', 'connectedEmail', 'nudgeApiUsage', 'backgroundImageData', 'backgroundImageBlob', 'lastFetchTimestamp'], () => {
+            // Also update connection status
+            chrome.storage.local.set({ connectionStatus: 'disconnected' });
             console.log('Nudge API key disconnected.');
             initializeApiState(); // Refresh the view
         });
@@ -114,6 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     disconnectPexelsBtn.addEventListener('click', () => {
         chrome.storage.local.remove(['userPexelsKey', 'pexelsRateLimit', 'pexelsRateRemaining', 'backgroundImageData', 'backgroundImageBlob', 'lastFetchTimestamp'], () => {
+            // Also update connection status
+            chrome.storage.local.set({ connectionStatus: 'disconnected' });
             console.log('Pexels API key disconnected.');
             initializeApiState(); // Refresh the view
         });
@@ -171,7 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
             chrome.storage.local.set({ 
                 userPexelsKey: pexelsKey,
                 nudgeApiKey: null, // Clear the other key type to ensure exclusivity
-                connectedEmail: null
+                connectedEmail: null,
+                connectionStatus: 'byok'
             }, () => {
                 status2.textContent = 'Success! Your Pexels key is verified and saved.';
                 status2.className = 'status-message success';
@@ -261,9 +331,72 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCollapsibleVisibility();
     
     // =================================================================
-    //  BLACKLIST LOGIC (REFACTORED for Smart Toggles)
+    //  DISTRACTION MANAGEMENT LOGIC (v1.0.2 - Updated for normalization)
     // =================================================================
-    let blacklist = []; // Will be an array of objects: { domain: '..', active: true }
+    let distractions = []; // Array of objects: { domain: 'normalized.domain', active: true, addedAt: timestamp }
+
+    // Domain normalization function (inline implementation)
+    function normalizeDomain(input) {
+        if (!input || typeof input !== 'string') {
+            return null;
+        }
+
+        let domain = input.trim();
+        if (!domain) return null;
+
+        // Remove protocol
+        domain = domain.replace(/^https?:\/\//, '');
+        // Remove paths, query parameters, fragments
+        domain = domain.split('/')[0].split('?')[0].split('#')[0];
+        // Convert to lowercase
+        domain = domain.toLowerCase();
+        // Remove trailing dots
+        domain = domain.replace(/\.+$/, '');
+        // Remove www prefix
+        domain = domain.replace(/^www\./, '');
+        
+        // Basic validation
+        if (!domain.includes('.') && domain !== 'localhost') {
+            return null;
+        }
+        if (!/^[a-z0-9.-]+$/.test(domain)) {
+            return null;
+        }
+        if (/^[.-]|[.-]$/.test(domain)) {
+            return null;
+        }
+        if (/\.\./.test(domain)) {
+            return null;
+        }
+        
+        return domain;
+    }
+
+    // Validate domain input
+    function validateDomainInput(input) {
+        const normalized = normalizeDomain(input);
+        
+        if (!normalized) {
+            return {
+                valid: false,
+                error: 'Please enter a valid domain name (e.g., example.com)'
+            };
+        }
+        
+        // Check for duplicates
+        const isDuplicate = distractions.some(item => item.domain === normalized);
+        if (isDuplicate) {
+            return {
+                valid: false,
+                error: 'This domain is already in your list'
+            };
+        }
+        
+        return {
+            valid: true,
+            domain: normalized
+        };
+    }
 
     // Helper function to get favicon URL
     const getFaviconUrl = (domain) => `https://www.google.com/s2/favicons?sz=64&domain_url=${domain}`;
@@ -277,12 +410,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
-    const renderBlacklist = () => {
+    const renderDistractions = () => {
         blacklistTableBody.innerHTML = '';
-        if (blacklist.length === 0) {
+        if (distractions.length === 0) {
             blacklistTableBody.innerHTML = '<tr><td colspan="3" class="empty-table-cell">Your distraction list is empty.</td></tr>';
         } else {
-            blacklist.forEach(item => {
+            distractions.forEach(item => {
                 const row = document.createElement('tr');
                 const blockBtnDisabled = item.active ? 'disabled' : '';
                 const unblockBtnDisabled = !item.active ? 'disabled' : '';
@@ -301,37 +434,90 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const saveBlacklist = () => {
-        chrome.storage.local.set({ blacklist: blacklist }, () => {
-            console.log('Blacklist saved to local storage.');
-            renderBlacklist(); // Re-render to reflect any changes
+    const saveDistractions = () => {
+        chrome.storage.local.set({ distractions: distractions }, () => {
+            console.log('Distractions saved to local storage.');
+            renderDistractions(); // Re-render to reflect any changes
         });
     };
 
-    const initializeBlacklist = () => {
-        chrome.storage.local.get(['blacklist'], (result) => {
-            // Migration: Check if the stored list is the old string format
-            if (result.blacklist && result.blacklist.length > 0 && typeof result.blacklist[0] === 'string') {
-                console.log('Migrating old blacklist format...');
-                blacklist = result.blacklist.map(domain => ({ domain: domain, active: true }));
-                saveBlacklist(); // Save the new format immediately
+    const initializeDistractions = () => {
+        chrome.storage.local.get(['distractions', 'blacklist'], (result) => {
+            // Use new distractions format, with fallback to blacklist for migration
+            if (result.distractions) {
+                distractions = result.distractions;
+            } else if (result.blacklist) {
+                // Migration: Convert blacklist to distractions format with normalization
+                console.log('Migrating blacklist to distractions format...');
+                distractions = [];
+                const seenDomains = new Set();
+                
+                result.blacklist.forEach(item => {
+                    let domain, active;
+                    
+                    if (typeof item === 'string') {
+                        domain = item;
+                        active = true;
+                    } else if (item && typeof item === 'object') {
+                        domain = item.domain;
+                        active = item.active !== undefined ? item.active : true;
+                    } else {
+                        return; // Skip invalid entries
+                    }
+                    
+                    const normalizedDomain = normalizeDomain(domain);
+                    
+                    if (normalizedDomain && !seenDomains.has(normalizedDomain)) {
+                        seenDomains.add(normalizedDomain);
+                        distractions.push({
+                            domain: normalizedDomain,
+                            active: active,
+                            addedAt: Date.now()
+                        });
+                    }
+                });
+                
+                saveDistractions(); // Save the new format immediately
             } else {
-                blacklist = result.blacklist || [];
+                distractions = [];
             }
-            renderBlacklist();
+            renderDistractions();
         });
     };
 
     // --- Event Handlers ---
     blacklistForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const newDomain = blacklistInput.value.trim();
-        if (newDomain && !blacklist.some(item => item.domain === newDomain)) {
-            blacklist.push({ domain: newDomain, active: true });
-            saveBlacklist();
-            blacklistInput.value = '';
-            document.getElementById('favicon-preview').classList.add('hidden'); // Hide favicon preview
+        const input = blacklistInput.value.trim();
+        
+        // Validate and normalize the domain
+        const validation = validateDomainInput(input);
+        
+        if (!validation.valid) {
+            // Show error message
+            blacklistInput.style.border = '2px solid #DC2626';
+            blacklistInput.title = validation.error;
+            
+            // Remove error styling after 3 seconds
+            setTimeout(() => {
+                blacklistInput.style.border = '';
+                blacklistInput.title = '';
+            }, 3000);
+            
+            return;
         }
+        
+        // Add the normalized domain
+        distractions.push({ 
+            domain: validation.domain, 
+            active: true,
+            addedAt: Date.now()
+        });
+        saveDistractions();
+        blacklistInput.value = '';
+        blacklistInput.style.border = '';
+        blacklistInput.title = '';
+        document.getElementById('favicon-preview').classList.add('hidden'); // Hide favicon preview
     });
 
     blacklistTableBody.addEventListener('click', (e) => {
@@ -340,14 +526,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const domain = target.dataset.domain;
             
             if (target.classList.contains('delete-domain-btn')) {
-                blacklist = blacklist.filter(item => item.domain !== domain);
+                distractions = distractions.filter(item => item.domain !== domain);
             }
             if (target.classList.contains('toggle-block-btn')) {
-                blacklist = blacklist.map(item => 
+                distractions = distractions.map(item => 
                     item.domain === domain ? { ...item, active: !item.active } : item
                 );
             }
-            saveBlacklist();
+            saveDistractions();
         }
     });
 
@@ -367,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Replace the previous initializeBlacklist() call in your main initializeApp function
-    initializeBlacklist();
+    initializeDistractions();
 
     // =================================================================
     //  ABOUT SECTION LOGIC 

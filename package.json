@@ -1,0 +1,35 @@
+{
+  "name": "nudge-extension",
+  "version": "1.0.2",
+  "description": "A beautiful and smart new tab page to help you focus on your tasks",
+  "scripts": {
+    "lint": "eslint js/**/*.js",
+    "lint:fix": "eslint js/**/*.js --fix",
+    "format": "prettier --write js/**/*.js pages/**/*.html css/**/*.css",
+    "format:check": "prettier --check js/**/*.js pages/**/*.html css/**/*.css",
+    "test": "echo 'Manual testing required - see docs/testing.md'",
+    "build": "npm run lint && npm run format:check",
+    "package": "npm run build && npm run zip",
+    "zip": "zip -r nudge-v1.0.2.zip . -x 'node_modules/*' '.git/*' '*.zip' 'package-lock.json' '.eslintcache'"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "chrome-extension",
+    "productivity",
+    "new-tab",
+    "focus",
+    "distraction-blocking"
+  ],
+  "author": "Shakib Bin Kabir",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shakibbinkabir/nudge.git"
+  }
+}

@@ -9,13 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const guiltMessageEl = document.getElementById('snooze-guilt');
 
     // =================================================================
-    //  1. DYNAMIC BACKGROUND LOGIC (FINAL IMPLEMENTATION)
+    //  1. CENTRALIZED BACKGROUND LOGIC (v1.0.2)
     // =================================================================
-    const NUDGE_API_URL = 'https://lab.shakibbinkabir.me/api/nudge/v2/endpoints/image.php?query=dark%20nature';
-    const PEXELS_API_URL = `https://api.pexels.com/v1/search?query=dark%20nature&per_page=20`;
-    const CACHE_DURATION_MS = 24 * 60 * 60 * 1000; // Cache for 24 hours
-
-
+    
     // Attribution container for Pexels credit
     let attributionContainer = document.getElementById('attribution-container');
     if (!attributionContainer) {
@@ -34,62 +30,141 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(attributionContainer);
     }
 
-    // Set background and show Pexels credit if available
-    const setBackground = (imageUrl, photographer, photographerUrl) => {
-        document.body.style.backgroundImage = `url(${imageUrl})`;
-        if (photographer && photographerUrl) {
-            attributionContainer.innerHTML = `Photo by <a href="${photographerUrl}" target="_blank" style="color:#fff;text-decoration:underline;">${photographer}</a> on <a href="https://www.pexels.com" target="_blank" style="color:#fff;text-decoration:underline;">Pexels</a>`;
-        } else {
-            attributionContainer.innerHTML = 'None';
-        }
-    };
-
-    const fetchAndCacheBackground = async (keys) => {
+    async function loadInterventionBackground() {
         try {
-            let imageUrlToCache, photographer, photographerUrl;
-            if (keys.userPexelsKey) {
-                const response = await fetch(PEXELS_API_URL, { headers: { 'Authorization': keys.userPexelsKey } });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Pexels API error');
-                if (data.photos && data.photos.length > 0) {
-                    const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
-                    imageUrlToCache = photo.src.large2x;
-                    photographer = photo.photographer;
-                    photographerUrl = photo.photographer_url;
+            // Get API keys and cache
+            const result = await new Promise((resolve) => {
+                chrome.storage.local.get(['userPexelsKey', 'backgroundCache', 'connectionStatus'], resolve);
+            });
+            
+            const userPexelsKey = result.userPexelsKey;
+            const cache = result.backgroundCache;
+            
+            // Check if we have a valid cache first
+            if (cache && cache.expiresAt && Date.now() < cache.expiresAt) {
+                console.log('Using cached background for intervention');
+                displayInterventionBackground({
+                    image_url: cache.url,
+                    photographer: cache.photographer,
+                    photographer_url: cache.photographer_url,
+                    imageBlob: cache.imageBlob
+                });
+                return;
+            }
+            
+            // Try to fetch fresh background if we have a key
+            if (userPexelsKey) {
+                console.log('Fetching fresh background for intervention from Pexels');
+                const backgroundResult = await fetchPexelsBackgroundForIntervention(userPexelsKey);
+                
+                if (backgroundResult.success) {
+                    displayInterventionBackground(backgroundResult.data);
+                    return;
                 }
-            } else if (keys.nudgeApiKey) {
-                console.warn('Nudge API temporarily unavailable. Please use a Pexels API key in settings.');
             }
-
-            if (imageUrlToCache) {
-                chrome.storage.local.set({ interventionBg: { url: imageUrlToCache, timestamp: Date.now(), photographer, photographerUrl } });
-                setBackground(imageUrlToCache, photographer, photographerUrl);
+            
+            // Use stale cache if available
+            if (cache && cache.url) {
+                console.log('Using stale cached background for intervention as fallback');
+                displayInterventionBackground({
+                    image_url: cache.url,
+                    photographer: cache.photographer || 'Unknown',
+                    photographer_url: cache.photographer_url || '#',
+                    imageBlob: cache.imageBlob
+                });
+                return;
             }
+            
+            // Final fallback to local image
+            console.log('Using local fallback background for intervention');
+            displayLocalFallbackForIntervention();
+            
         } catch (error) {
-            console.error("Failed to fetch new intervention background:", error);
+            console.error('Error loading intervention background:', error);
+            displayLocalFallbackForIntervention();
         }
-    };
+    }
 
-    const handleInterventionBackground = () => {
-        chrome.storage.local.get(['nudgeApiKey', 'userPexelsKey', 'interventionBg'], (result) => {
-            const now = Date.now();
-            const cache = result.interventionBg;
-
-            if (cache && (now - cache.timestamp < CACHE_DURATION_MS)) {
-                setBackground(cache.url, cache.photographer, cache.photographerUrl);
-            } else {
-                fetchAndCacheBackground({ nudgeApiKey: result.nudgeApiKey, userPexelsKey: result.userPexelsKey });
-                if (result.nudgeApiKey && !result.userPexelsKey) {
-                    attributionContainer.innerHTML = `Nudge API is temporarily off. Add a Pexels key in <a href="#" id="open-options-intervention">settings</a>.`;
-                    const link = document.getElementById('open-options-intervention');
-                    if (link) link.addEventListener('click', () => chrome.runtime.openOptionsPage());
-                }
+    async function fetchPexelsBackgroundForIntervention(apiKey) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            
+            const response = await fetch('https://api.pexels.com/v1/search?query=dark%20nature&per_page=20', {
+                headers: { 'Authorization': apiKey },
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-        });
-    };
-
-    // Initialize background handling
-    handleInterventionBackground();
+            
+            const data = await response.json();
+            
+            if (!data.photos || data.photos.length === 0) {
+                throw new Error('No photos returned from Pexels API');
+            }
+            
+            const randomIndex = Math.floor(Math.random() * data.photos.length);
+            const photo = data.photos[randomIndex];
+            
+            if (!photo || !photo.src) {
+                throw new Error('Invalid photo data structure');
+            }
+            
+            let imageUrl;
+            if (photo.src.large2x) {
+                imageUrl = photo.src.large2x;
+            } else if (photo.src.large) {
+                imageUrl = photo.src.large;
+            } else if (photo.src.medium) {
+                imageUrl = photo.src.medium;
+            } else if (photo.src.original) {
+                imageUrl = photo.src.original;
+            } else {
+                throw new Error('No suitable image URL found');
+            }
+            
+            const backgroundData = {
+                image_url: imageUrl,
+                photographer: photo.photographer || 'Unknown',
+                photographer_url: photo.photographer_url || '#'
+            };
+            
+            return { success: true, data: backgroundData };
+            
+        } catch (error) {
+            console.error('Intervention Pexels API error:', error);
+            return { success: false, error: error };
+        }
+    }
+    
+    function displayInterventionBackground(bgData) {
+        if (bgData.imageBlob) {
+            // Use cached blob image
+            const objectUrl = URL.createObjectURL(bgData.imageBlob);
+            document.body.style.backgroundImage = `url(${objectUrl})`;
+        } else {
+            // Use remote URL
+            document.body.style.backgroundImage = `url(${bgData.image_url})`;
+        }
+        
+        if (bgData.photographer && bgData.photographer_url) {
+            attributionContainer.innerHTML = `Photo by <a href="${bgData.photographer_url}" target="_blank" style="color:#fff;text-decoration:underline;">${bgData.photographer}</a> on <a href="https://www.pexels.com" target="_blank" style="color:#fff;text-decoration:underline;">Pexels</a>`;
+        } else {
+            attributionContainer.innerHTML = '';
+        }
+    }
+    
+    function displayLocalFallbackForIntervention() {
+        document.body.style.backgroundImage = `url('../assets/background.jpg')`;
+        attributionContainer.innerHTML = '';
+    }
+    
+    // Initialize background loading
+    loadInterventionBackground();
 
     // =================================================================
     //  ANIMATION & CONTENT ORCHESTRATION
