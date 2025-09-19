@@ -1,3 +1,26 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Build artifacts
 *.zip
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Cache
+.eslintcache
+.prettierignore
+
 .github
 /temp-designs/
