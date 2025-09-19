@@ -39,8 +39,13 @@ body {
     box-sizing: border-box;
     position: relative; /* For absolute positioning of children */
 }
-.container.visible { opacity: 1; transform: scale(1); }
-.container.tasks-visible { justify-content: center; }
+.container.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+.container.tasks-visible {
+    justify-content: center;
+}
 
 h1#quirky-message {
     font-size: 5rem;
@@ -51,8 +56,14 @@ h1#quirky-message {
     transform: scale(0.9);
     transition: all 600ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-h1#quirky-message.visible { opacity: 1; transform: scale(0.75); }
-.container.tasks-visible h1#quirky-message { font-size: 2.5rem; margin-bottom: 1rem; }
+h1#quirky-message.visible {
+    opacity: 1;
+    transform: scale(0.75);
+}
+.container.tasks-visible h1#quirky-message {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
 
 #task-content-wrapper {
     width: 100%;
@@ -63,19 +74,67 @@ h1#quirky-message.visible { opacity: 1; transform: scale(0.75); }
     opacity: 0;
     pointer-events: none;
     transform: translateY(30px);
-    transition: opacity 600ms ease-in-out, transform 600ms ease-in-out;
+    transition:
+        opacity 600ms ease-in-out,
+        transform 600ms ease-in-out;
 }
-.container.tasks-visible #task-content-wrapper { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.container.tasks-visible #task-content-wrapper {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
 
-.tasks-card { width: 100%; max-width: 550px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 0.5rem 1.5rem; margin-top: 1rem; text-align: left; box-sizing: border-box; }
-#top-tasks-list { list-style: none; padding: 0; margin: 0; }
-#top-tasks-list li { display: flex; flex-direction: column; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-.task-title { font-weight: 600; font-size: 0.8rem;}
-#top-tasks-list li:last-child { border-bottom: none; }
-.task-meta { font-size: 0.8rem; opacity: 0.7; margin-top: 0.2rem; }
+.tasks-card {
+    width: 100%;
+    max-width: 550px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 0.5rem 1.5rem;
+    margin-top: 1rem;
+    text-align: left;
+    box-sizing: border-box;
+}
+#top-tasks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+#top-tasks-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.task-title {
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+#top-tasks-list li:last-child {
+    border-bottom: none;
+}
+.task-meta {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-top: 0.2rem;
+}
 
-#show-snooze-btn { margin-top: 2rem; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.8rem 1.5rem; border-radius: 24px; cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: background-color 0.2s; }
-#show-snooze-btn:hover { background: rgba(255, 255, 255, 0.2); }
+#show-snooze-btn {
+    margin-top: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.8rem 1.5rem;
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+#show-snooze-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
 
 /* --- Snooze Section Styling --- */
 .snooze-section {
@@ -85,32 +144,58 @@ h1#quirky-message.visible { opacity: 1; transform: scale(0.75); }
     opacity: 0;
     pointer-events: none;
     transform: translateY(20px);
-    transition: opacity 400ms ease-out, transform 400ms ease-out;
+    transition:
+        opacity 400ms ease-out,
+        transform 400ms ease-out;
 }
-.snooze-section.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.snooze-section h3 { font-size: 2rem; margin-bottom: 2.5rem; }
-.snooze-section p { opacity: 0.8; margin-bottom: 1rem; }
-.snooze-buttons button {padding: 0.8rem 1.2rem; margin: 1rem 0.5rem 0rem 0.5rem; background: rgba(255, 255, 255, 0.4); color: #fff; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 24px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: background-color 0.2s; }
-.snooze-buttons button:hover { background: rgba(255, 255, 255, 0.6); }
+.snooze-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.snooze-section h3 {
+    font-size: 2rem;
+    margin-bottom: 2.5rem;
+}
+.snooze-section p {
+    opacity: 0.8;
+    margin-bottom: 1rem;
+}
+.snooze-buttons button {
+    padding: 0.8rem 1.2rem;
+    margin: 1rem 0.5rem 0rem 0.5rem;
+    background: rgba(255, 255, 255, 0.4);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+.snooze-buttons button:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
 #snooze-guilt {
     margin-top: 1rem;
     font-style: italic;
     font-weight: bold;
-    color: #FF1111;
+    color: #ff1111;
     text-shadow: 3px 3px 4px rgba(0, 0, 0, 0.99);
 }
 #attribution-container {
     position: fixed;
     bottom: 16px;
     right: 24px;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.45);
     color: #fff;
     font-size: 10px;
     padding: 6px 14px;
     border-radius: 10px;
     z-index: 1002;
     font-family: inherit;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.18);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.18);
     letter-spacing: 0.01em;
     line-height: 1.5;
     opacity: 0.92;
@@ -119,7 +204,9 @@ h1#quirky-message.visible { opacity: 1; transform: scale(0.75); }
 #attribution-container a {
     color: #fff !important;
     text-decoration: none !important;
-    transition: font-weight 0.2s, color 0.2s text-decoration 0.2s;
+    transition:
+        font-weight 0.2s,
+        color 0.2s text-decoration 0.2s;
 }
 #attribution-container a:hover {
     text-decoration: underline !important;

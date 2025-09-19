@@ -12,10 +12,10 @@ const RETRY_DELAYS = [1000, 2000, 5000]; // Exponential backoff in milliseconds
  */
 const ErrorTypes = {
     INVALID_KEY: 'InvalidKey',
-    RATE_LIMITED: 'RateLimited', 
+    RATE_LIMITED: 'RateLimited',
     SERVER_DOWN: 'ServerDown',
     NETWORK_OFFLINE: 'NetworkOffline',
-    UNKNOWN: 'Unknown'
+    UNKNOWN: 'Unknown',
 };
 
 /**
@@ -25,7 +25,7 @@ function classifyError(error, response) {
     if (!navigator.onLine) {
         return ErrorTypes.NETWORK_OFFLINE;
     }
-    
+
     if (response) {
         if (response.status === 401 || response.status === 403) {
             return ErrorTypes.INVALID_KEY;
@@ -37,7 +37,7 @@ function classifyError(error, response) {
             return ErrorTypes.SERVER_DOWN;
         }
     }
-    
+
     return ErrorTypes.UNKNOWN;
 }
 
@@ -79,9 +79,9 @@ async function saveCacheBackground(backgroundData, provider) {
         expiresAt: now + CACHE_DURATION_MS,
         photographer: backgroundData.photographer,
         photographer_url: backgroundData.photographer_url,
-        imageBlob: backgroundData.imageBlob
+        imageBlob: backgroundData.imageBlob,
     };
-    
+
     return new Promise((resolve) => {
         chrome.storage.local.set({ backgroundCache: cache }, () => {
             resolve(cache);
@@ -95,24 +95,24 @@ async function saveCacheBackground(backgroundData, provider) {
 async function fetchBackground(provider, apiKey, retryCount = 0) {
     try {
         let url, headers;
-        
+
         if (provider === 'pexels') {
             url = 'https://api.pexels.com/v1/search?query=dark%20nature&per_page=20';
-            headers = { 'Authorization': apiKey };
+            headers = { Authorization: apiKey };
         } else {
             throw new Error('Invalid provider specified');
         }
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
-        
+
         const response = await fetch(url, {
             headers: headers,
-            signal: controller.signal
+            signal: controller.signal,
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             const errorType = classifyError(null, response);
             const error = new Error(`${errorType}: ${response.status} ${response.statusText}`);
@@ -122,7 +122,7 @@ async function fetchBackground(provider, apiKey, retryCount = 0) {
         }
 
         const data = await response.json();
-        
+
         if (!data.photos || data.photos.length === 0) {
             throw new Error('No photos returned from API');
         }
@@ -130,7 +130,7 @@ async function fetchBackground(provider, apiKey, retryCount = 0) {
         // Select random photo
         const randomIndex = Math.floor(Math.random() * data.photos.length);
         const photo = data.photos[randomIndex];
-        
+
         if (!photo || !photo.src) {
             throw new Error('Invalid photo data structure');
         }
@@ -152,7 +152,7 @@ async function fetchBackground(provider, apiKey, retryCount = 0) {
         const backgroundData = {
             image_url: imageUrl,
             photographer: photo.photographer || 'Unknown',
-            photographer_url: photo.photographer_url || '#'
+            photographer_url: photo.photographer_url || '#',
         };
 
         // Try to download and cache the image
@@ -168,35 +168,35 @@ async function fetchBackground(provider, apiKey, retryCount = 0) {
 
         // Save to cache
         await saveCacheBackground(backgroundData, provider);
-        
+
         return {
             success: true,
             data: backgroundData,
-            provider: provider
+            provider: provider,
         };
-
     } catch (error) {
         console.error(`Background fetch attempt ${retryCount + 1} failed:`, error);
-        
+
         // Check if we should retry
-        const shouldRetry = retryCount < MAX_RETRIES && 
-                           error.type !== ErrorTypes.INVALID_KEY &&
-                           (error.type === ErrorTypes.SERVER_DOWN || 
-                            error.type === ErrorTypes.NETWORK_OFFLINE ||
-                            error.type === ErrorTypes.UNKNOWN);
-        
+        const shouldRetry =
+            retryCount < MAX_RETRIES &&
+            error.type !== ErrorTypes.INVALID_KEY &&
+            (error.type === ErrorTypes.SERVER_DOWN ||
+                error.type === ErrorTypes.NETWORK_OFFLINE ||
+                error.type === ErrorTypes.UNKNOWN);
+
         if (shouldRetry) {
             const delay = RETRY_DELAYS[retryCount] || RETRY_DELAYS[RETRY_DELAYS.length - 1];
             console.log(`Retrying in ${delay}ms...`);
-            
-            await new Promise(resolve => setTimeout(resolve, delay));
+
+            await new Promise((resolve) => setTimeout(resolve, delay));
             return fetchBackground(provider, apiKey, retryCount + 1);
         }
-        
+
         return {
             success: false,
             error: error,
-            errorType: error.type || ErrorTypes.UNKNOWN
+            errorType: error.type || ErrorTypes.UNKNOWN,
         };
     }
 }
@@ -207,19 +207,19 @@ async function fetchBackground(provider, apiKey, retryCount = 0) {
 async function downloadImage(imageUrl) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
-    
+
     try {
         const response = await fetch(imageUrl, {
             signal: controller.signal,
-            cache: 'no-store'
+            cache: 'no-store',
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error('Failed to download image');
         }
-        
+
         return await response.blob();
     } catch (error) {
         clearTimeout(timeoutId);
@@ -235,7 +235,7 @@ function getFallbackBackground() {
         image_url: '../assets/background.jpg',
         photographer: 'Nudge',
         photographer_url: '#',
-        isLocal: true
+        isLocal: true,
     };
 }
 
@@ -253,10 +253,10 @@ async function getBackground(userPexelsKey) {
                 image_url: cachedBackground.url,
                 photographer: cachedBackground.photographer,
                 photographer_url: cachedBackground.photographer_url,
-                imageBlob: cachedBackground.imageBlob
+                imageBlob: cachedBackground.imageBlob,
             },
             provider: cachedBackground.provider,
-            fromCache: true
+            fromCache: true,
         };
     }
 
@@ -264,21 +264,21 @@ async function getBackground(userPexelsKey) {
     if (userPexelsKey) {
         console.log('Fetching fresh background from Pexels');
         const result = await fetchBackground('pexels', userPexelsKey);
-        
+
         if (result.success) {
             // Update connection status
             chrome.storage.local.set({ connectionStatus: 'byok' });
             return result;
         } else {
             console.warn('Failed to fetch background:', result.error);
-            
+
             // Try to use stale cache if available
             const staleCache = await new Promise((resolve) => {
                 chrome.storage.local.get(['backgroundCache'], (result) => {
                     resolve(result.backgroundCache);
                 });
             });
-            
+
             if (staleCache && staleCache.url) {
                 console.log('Using stale cached background as fallback');
                 return {
@@ -287,11 +287,11 @@ async function getBackground(userPexelsKey) {
                         image_url: staleCache.url,
                         photographer: staleCache.photographer,
                         photographer_url: staleCache.photographer_url,
-                        imageBlob: staleCache.imageBlob
+                        imageBlob: staleCache.imageBlob,
                     },
                     provider: staleCache.provider,
                     fromStaleCache: true,
-                    error: result.error
+                    error: result.error,
                 };
             }
         }
@@ -300,12 +300,12 @@ async function getBackground(userPexelsKey) {
     // Step 3: Fallback to local placeholder
     console.log('Using local fallback background');
     chrome.storage.local.set({ connectionStatus: 'disconnected' });
-    
+
     return {
         success: true,
         data: getFallbackBackground(),
         provider: 'local',
-        isLocal: true
+        isLocal: true,
     };
 }
 
@@ -315,6 +315,6 @@ if (typeof module !== 'undefined' && module.exports) {
         getBackground,
         getCachedBackground,
         ErrorTypes,
-        getFallbackBackground
+        getFallbackBackground,
     };
 }

@@ -1,34 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>A Nudge...</title>
-    <link rel="stylesheet" href="../css/intervention.css">
-</head>
-<body>
-    <div class="background-overlay"></div>
-    <div class="container">
-        <h1 id="quirky-message"></h1>
-        <div id="task-content-wrapper">
-            <p>You have more important things to do:</p>
-            <div class="tasks-card">
-                <ul id="top-tasks-list"></ul>
+    <head>
+        <meta charset="UTF-8" />
+        <title>A Nudge...</title>
+        <link rel="stylesheet" href="../css/intervention.css" />
+    </head>
+    <body>
+        <div class="background-overlay"></div>
+        <div class="container">
+            <h1 id="quirky-message"></h1>
+            <div id="task-content-wrapper">
+                <p>You have more important things to do:</p>
+                <div class="tasks-card">
+                    <ul id="top-tasks-list"></ul>
+                </div>
+                <button id="show-snooze-btn">I'll Do Later!</button>
             </div>
-            <button id="show-snooze-btn">I'll Do Later!</button>
-        </div>
-        <div class="snooze-section">
-            <h3>Fine, ignore me then... 🙄</h3>
-            <p>How long are you planning to procrastinate?</p>
-            <div class="snooze-buttons">
-                <button class="snooze-btn" data-minutes="10">Just 10 minutes 🙁</button>
-                <button class="snooze-btn" data-minutes="30">Half an hour 😨</button>
-                <button class="snooze-btn" data-minutes="60">A whole hour 😭</button>
+            <div class="snooze-section">
+                <h3>Fine, ignore me then... 🙄</h3>
+                <p>How long are you planning to procrastinate?</p>
+                <div class="snooze-buttons">
+                    <button class="snooze-btn" data-minutes="10">Just 10 minutes 🙁</button>
+                    <button class="snooze-btn" data-minutes="30">Half an hour 😨</button>
+                    <button class="snooze-btn" data-minutes="60">A whole hour 😭</button>
+                </div>
+                <p id="snooze-guilt"></p>
             </div>
-            <p id="snooze-guilt"></p>
+            <div id="attribution-container"></div>
         </div>
-        <div id="attribution-container"></div>
-    </div>
-    
-<script src="../js/intervention.js"></script>
-</body>
+
+        <script src="../js/intervention.js"></script>
+    </body>
 </html>
