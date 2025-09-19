@@ -2,6 +2,33 @@
 
 All notable changes to the Nudge Chrome Extension will be documented in this file.
 
+## [1.0.2] - 2025-01-XX
+
+### Added
+- **Enhanced Background Caching:** 24-hour TTL cache with intelligent fallback to stale cache and local placeholder images
+- **Robust Error Handling:** Error classification (InvalidKey, RateLimited, ServerDown, NetworkOffline) with exponential backoff retry logic
+- **Connection Status Display:** Real-time connection badge in Settings showing "Connected via BYOK", "Disconnected", etc.
+- **Domain Input Validation:** Automatic normalization, deduplication, and validation for distraction list entries
+- **Update Notification System:** One-time banner for v1.0.2 users with dismissal functionality
+- **Build System:** ESLint and Prettier configuration with automated formatting and linting scripts
+
+### Changed
+- **Storage Schema v2:** Migrated from `blacklist` to `distractions` format with normalized domain storage
+- **Centralized Background Management:** Unified background fetching logic across New Tab and Intervention pages
+- **Improved Permissions:** Removed unused `tabs` and `activeTab` permissions, tightened host permissions to essential endpoints only
+- **Domain Normalization:** All domain inputs now stripped of protocols, lowercased, and deduplicated automatically
+
+### Fixed
+- **Background Reliability:** No more blank backgrounds - always shows cached, stale, or local fallback images
+- **Cache Consistency:** Proper 24h expiration with graceful handling of stale data
+- **Input Sanitization:** Prevents duplicate and invalid domain entries in distraction list
+- **Migration Safety:** Existing users' data automatically migrated to new format without data loss
+
+### Performance
+- **Reduced Bundle Size:** Excluded build artifacts and dependencies from repository
+- **Optimized Caching:** Blob-based image caching for true offline functionality
+- **Minimized API Calls:** Smart cache checking prevents unnecessary background fetches
+
 ## [1.0.1] - 2025-08-21
 
 ### Changed
